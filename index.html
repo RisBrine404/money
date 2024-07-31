@@ -272,6 +272,54 @@
                 transactionList.appendChild(item);
             }
 
+            function formatCurrency(amount) {
+                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            function updateBalances() {
+                const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const total = amounts.reduce((acc, amount) => acc + amount, 0);
+                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
+
+                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
+
+                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
+
+                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
+
+                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
+            }
+
+            function updateLocalStorage() {
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+            }
+
+            function init() {
+                transactionList.innerHTML = '';
+                transactions.forEach(addTransactionDOM);
+                updateBalances();
+                populateAccountSelect();
+            }
+
+            function populateAccountSelect() {
+                accountSelect.innerHTML = '';
+                accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account;
+                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
+                    accountSelect.appendChild(option);
+                });
+            }
+
             function confirmRemoveTransaction(id) {
                 if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
                     removeTransaction(id);
@@ -284,80 +332,19 @@
                 init();
             }
 
-            function function formatCurrency(amount) {
-                    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                }
-
-                function updateBalances() {
-                    const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                    const total = amounts.reduce((acc, amount) => acc + amount, 0);
-                    balanceTotal.textContent = 'Rp ' + formatCurrency(total);
-
-                    const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                    const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
-                    balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
-
-                    const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                    const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
-                    balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
-
-                    const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                    const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
-                    balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
-
-                    const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                    const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
-                    balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
-                }
-
-                function updateLocalStorage() {
-                    localStorage.setItem('transactions', JSON.stringify(transactions));
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
-                }
-
-                function init() {
-                    transactionList.innerHTML = '';
-                    transactions.forEach(addTransactionDOM);
-                    updateBalances();
+            addAccountBtn.addEventListener('click', () => {
+                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
+                if (newAccount && !accounts.includes(newAccount)) {
+                    accounts.push(newAccount);
+                    updateLocalStorage();
                     populateAccountSelect();
                 }
-
-                function populateAccountSelect() {
-                    accountSelect.innerHTML = '';
-                    accounts.forEach(account => {
-                        const option = document.createElement('option');
-                        option.value = account;
-                        option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
-                        accountSelect.appendChild(option);
-                    });
-                }
-
-                addAccountBtn.addEventListener('click', () => {
-                    const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                    if (newAccount && !accounts.includes(newAccount)) {
-                        accounts.push(newAccount);
-                        updateLocalStorage();
-                        populateAccountSelect();
-                    }
-                });
-
-                init();
-
-                form.addEventListener('submit', addTransaction);
             });
 
-            function confirmRemoveTransaction(id) {
-                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                    removeTransaction(id);
-                }
-            }
+            form.addEventListener('submit', addTransaction);
 
-            function removeTransaction(id) {
-                let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-                transactions = transactions.filter(transaction => transaction.id !== id);
-                localStorage.setItem('transactions', JSON.stringify(transactions));
-                document.location.reload();
-            }
-        </script>
-    </body>
+            init();
+        });
+    </script>
+</body>
 </html>
