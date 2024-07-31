@@ -81,24 +81,33 @@
             padding: 0;
         }
 
-        #transaction-list li {
-            background: #fff;
-            border-left: 5px solid;
+        .transaction-item {
             margin: 10px 0;
             padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border: 1px solid #ccc;
             border-radius: 4px;
+            background: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .income {
-            border-color: #28a745;
+        .transaction-item table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .expense {
-            border-color: #dc3545;
+        .transaction-item th, .transaction-item td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .transaction-item th {
+            background: #f4f4f4;
+        }
+
+        .transaction-item .actions {
+            text-align: right;
+            margin-top: 10px;
         }
 
         .delete-btn {
@@ -236,14 +245,30 @@
             function addTransactionDOM(transaction) {
                 const sign = transaction.type === 'income' ? '+' : '-';
                 const item = document.createElement('li');
-
-                item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
-
+                item.classList.add('transaction-item');
                 item.innerHTML = `
-                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
-                    <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
+                    <table>
+                        <tr>
+                            <th>Tanggal</th>
+                            <td>${transaction.date}</td>
+                        </tr>
+                        <tr>
+                            <th>Komentar</th>
+                            <td>${transaction.comment}</td>
+                        </tr>
+                        <tr>
+                            <th>Jalur Transaksi</th>
+                            <td>${transaction.account}</td>
+                        </tr>
+                        <tr>
+                            <th>Jumlah</th>
+                            <td>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</td>
+                        </tr>
+                    </table>
+                    <div class="actions">
+                        <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
+                    </div>
                 `;
-
                 transactionList.appendChild(item);
             }
 
@@ -259,80 +284,80 @@
                 init();
             }
 
-            function formatCurrency(amount) {
-                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            }
+            function function formatCurrency(amount) {
+                    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                }
 
-            function updateBalances() {
-                const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const total = amounts.reduce((acc, amount) => acc + amount, 0);
-                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
+                function updateBalances() {
+                    const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                    const total = amounts.reduce((acc, amount) => acc + amount, 0);
+                    balanceTotal.textContent = 'Rp ' + formatCurrency(total);
 
-                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
+                    const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                    const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
+                    balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
 
-                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
+                    const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                    const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
+                    balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
 
-                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
+                    const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                    const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
+                    balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
 
-                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
-            }
+                    const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                    const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
+                    balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
+                }
 
-            function updateLocalStorage() {
-                localStorage.setItem('transactions', JSON.stringify(transactions));
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-            }
+                function updateLocalStorage() {
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                }
 
-            function init() {
-                transactionList.innerHTML = '';
-                transactions.forEach(addTransactionDOM);
-                updateBalances();
-                populateAccountSelect();
-            }
-
-            function populateAccountSelect() {
-                accountSelect.innerHTML = '';
-                accounts.forEach(account => {
-                    const option = document.createElement('option');
-                    option.value = account;
-                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
-                    accountSelect.appendChild(option);
-                });
-            }
-
-            addAccountBtn.addEventListener('click', () => {
-                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount && !accounts.includes(newAccount)) {
-                    accounts.push(newAccount);
-                    updateLocalStorage();
+                function init() {
+                    transactionList.innerHTML = '';
+                    transactions.forEach(addTransactionDOM);
+                    updateBalances();
                     populateAccountSelect();
                 }
+
+                function populateAccountSelect() {
+                    accountSelect.innerHTML = '';
+                    accounts.forEach(account => {
+                        const option = document.createElement('option');
+                        option.value = account;
+                        option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
+                        accountSelect.appendChild(option);
+                    });
+                }
+
+                addAccountBtn.addEventListener('click', () => {
+                    const newAccount = prompt('Masukkan nama jalur transaksi baru:');
+                    if (newAccount && !accounts.includes(newAccount)) {
+                        accounts.push(newAccount);
+                        updateLocalStorage();
+                        populateAccountSelect();
+                    }
+                });
+
+                init();
+
+                form.addEventListener('submit', addTransaction);
             });
 
-            init();
-
-            form.addEventListener('submit', addTransaction);
-        });
-
-        function confirmRemoveTransaction(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                removeTransaction(id);
+            function confirmRemoveTransaction(id) {
+                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                    removeTransaction(id);
+                }
             }
-        }
 
-        function removeTransaction(id) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions = transactions.filter(transaction => transaction.id !== id);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            document.location.reload();
-        }
-    </script>
-</body>
+            function removeTransaction(id) {
+                let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                transactions = transactions.filter(transaction => transaction.id !== id);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                document.location.reload();
+            }
+        </script>
+    </body>
 </html>
