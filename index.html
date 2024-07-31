@@ -81,33 +81,24 @@
             padding: 0;
         }
 
-        .transaction-item {
+        #transaction-list li {
+            background: #fff;
+            border-left: 5px solid;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-radius: 4px;
-            background: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .transaction-item table {
-            width: 100%;
-            border-collapse: collapse;
+        .income {
+            border-color: #28a745;
         }
 
-        .transaction-item th, .transaction-item td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .transaction-item th {
-            background: #f4f4f4;
-        }
-
-        .transaction-item .actions {
-            text-align: right;
-            margin-top: 10px;
+        .expense {
+            border-color: #dc3545;
         }
 
         .delete-btn {
@@ -245,31 +236,27 @@
             function addTransactionDOM(transaction) {
                 const sign = transaction.type === 'income' ? '+' : '-';
                 const item = document.createElement('li');
-                item.classList.add('transaction-item');
+
+                item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
+
                 item.innerHTML = `
-                    <table>
-                        <tr>
-                            <th>Tanggal</th>
-                            <td>${transaction.date}</td>
-                        </tr>
-                        <tr>
-                            <th>Komentar</th>
-                            <td>${transaction.comment}</td>
-                        </tr>
-                        <tr>
-                            <th>Jalur Transaksi</th>
-                            <td>${transaction.account}</td>
-                        </tr>
-                        <tr>
-                            <th>Jumlah</th>
-                            <td>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</td>
-                        </tr>
-                    </table>
-                    <div class="actions">
-                        <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
-                    </div>
+                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
+                    <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
                 `;
+
                 transactionList.appendChild(item);
+            }
+
+            function confirmRemoveTransaction(id) {
+                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                    removeTransaction(id);
+                }
+            }
+
+            function removeTransaction(id) {
+                transactions = transactions.filter(transaction => transaction.id !== id);
+                updateLocalStorage();
+                init();
             }
 
             function formatCurrency(amount) {
@@ -320,18 +307,6 @@
                 });
             }
 
-            function confirmRemoveTransaction(id) {
-                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                    removeTransaction(id);
-                }
-            }
-
-            function removeTransaction(id) {
-                transactions = transactions.filter(transaction => transaction.id !== id);
-                updateLocalStorage();
-                init();
-            }
-
             addAccountBtn.addEventListener('click', () => {
                 const newAccount = prompt('Masukkan nama jalur transaksi baru:');
                 if (newAccount && !accounts.includes(newAccount)) {
@@ -341,10 +316,23 @@
                 }
             });
 
-            form.addEventListener('submit', addTransaction);
-
             init();
+
+            form.addEventListener('submit', addTransaction);
         });
+
+        function confirmRemoveTransaction(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                removeTransaction(id);
+            }
+        }
+
+        function removeTransaction(id) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions = transactions.filter(transaction => transaction.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            document.location.reload();
+        }
     </script>
 </body>
 </html>
