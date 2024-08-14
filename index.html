@@ -148,6 +148,10 @@
                     <td>Saldo Shopee</td>
                     <td id="shopee-balance">Rp 0</td>
                 </tr>
+                <tr>
+                    <td>Saldo GoPay</td>
+                    <td id="gopay-balance">Rp 0</td>
+                </tr>
             </tbody>
         </table>
         <form id="transaction-form">
@@ -173,6 +177,7 @@
                     <option value="bank">Bank Mandiri</option>
                     <option value="dana">Dana</option>
                     <option value="shopee">Shopee</option>
+                    <option value="gopay">GoPay</option>
                 </select>
             </div>
             <div class="form-group">
@@ -197,11 +202,12 @@
             const balanceBank = document.getElementById('bank-balance');
             const balanceDana = document.getElementById('dana-balance');
             const balanceShopee = document.getElementById('shopee-balance');
+            const balanceGoPay = document.getElementById('gopay-balance');
             const addAccountBtn = document.getElementById('add-account-btn');
             const accountSelect = document.getElementById('account');
 
             let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee'];
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
 
             function addTransaction(e) {
                 e.preventDefault();
@@ -283,6 +289,10 @@
                 const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
+
+                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
             }
 
             function updateLocalStorage() {
