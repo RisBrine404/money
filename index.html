@@ -113,6 +113,20 @@
         .delete-btn:hover {
             background: #c82333;
         }
+
+        #scroll-up-btn, #scroll-down-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #scroll-up-btn:hover, #scroll-down-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -154,6 +168,12 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="form-group">
+            <label for="search">Cari Transaksi:</label>
+            <input type="text" id="search" placeholder="Masukkan kata kunci...">
+        </div>
+
         <form id="transaction-form">
             <div class="form-group">
                 <label for="date">Tanggal:</label>
@@ -186,7 +206,12 @@
             </div>
             <button type="submit">Tambah</button>
         </form>
+
         <button id="add-account-btn">Tambah Jalur Transaksi Baru</button>
+
+        <button id="scroll-up-btn">Slip ke Atas</button>
+        <button id="scroll-down-btn">Slip ke Bawah</button>
+
         <h2>Riwayat Transaksi</h2>
         <ul id="transaction-list"></ul>
     </div>
@@ -205,6 +230,9 @@
             const balanceGoPay = document.getElementById('gopay-balance');
             const addAccountBtn = document.getElementById('add-account-btn');
             const accountSelect = document.getElementById('account');
+            const searchInput = document.getElementById('search');
+            const scrollUpBtn = document.getElementById('scroll-up-btn');
+            const scrollDownBtn = document.getElementById('scroll-down-btn');
 
             let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
             let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
@@ -265,84 +293,102 @@
                 init();
             }
 
-            function formatCurrency(amount) {
-                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            function updateBalances() {
+                const total = transactions.reduce((acc, transaction) => 
+                    transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                const cashBalance = transactions
+                    .filter(t => t.account === 'cash')
+                    .reduce((acc, transaction) => 
+                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                const bankBalance = transactions
+                    .filter(t => t.account === 'bank')
+                    .reduce((acc, transaction) => 
+                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                const danaBalance = transactions
+                    .filter(t => t.account === 'dana')
+                    .reduce((acc, transaction) => 
+                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                const shopeeBalance = transactions
+                    .filter(t => t.account === 'shopee')
+                    .reduce((acc, transaction) => 
+                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                const gopayBalance = transactions
+                    .filter(t => t.account === 'gopay')
+                    .reduce((acc, transaction) => 
+                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
+
+                balanceTotal.innerText = `Rp ${formatCurrency(total)}`;
+                balanceCash.innerText = `Rp ${formatCurrency(cashBalance)}`;
+                balanceBank.innerText = `Rp ${formatCurrency(bankBalance)}`;
+                balanceDana.innerText = `Rp ${formatCurrency(danaBalance)}`;
+                balanceShopee.innerText = `Rp ${formatCurrency(shopeeBalance)}`;
+                balanceGoPay.innerText = `Rp ${formatCurrency(gopayBalance)}`;
             }
 
-            function updateBalances() {
-                const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const total = amounts.reduce((acc, amount) => acc + amount, 0);
-                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
-
-                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
-
-                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
-
-                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
-
-                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
-
-                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
+            function formatCurrency(amount) {
+                return amount.toLocaleString('id-ID');
             }
 
             function updateLocalStorage() {
                 localStorage.setItem('transactions', JSON.stringify(transactions));
-                localStorage.setItem('accounts', JSON.stringify(accounts));
             }
 
             function init() {
                 transactionList.innerHTML = '';
                 transactions.forEach(addTransactionDOM);
                 updateBalances();
-                populateAccountSelect();
             }
 
-            function populateAccountSelect() {
-                accountSelect.innerHTML = '';
-                accounts.forEach(account => {
-                    const option = document.createElement('option');
-                    option.value = account;
-                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
-                    accountSelect.appendChild(option);
-                });
+            form.addEventListener('submit', addTransaction);
+
+            function searchTransactions() {
+                const keyword = searchInput.value.toLowerCase();
+                const filteredTransactions = transactions.filter(transaction => 
+                    transaction.comment.toLowerCase().includes(keyword) ||
+                    transaction.account.toLowerCase().includes(keyword));
+
+                transactionList.innerHTML = '';
+                filteredTransactions.forEach(addTransactionDOM);
             }
+
+            searchInput.addEventListener('input', searchTransactions);
+
+            scrollUpBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            scrollDownBtn.addEventListener('click', () => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            });
 
             addAccountBtn.addEventListener('click', () => {
                 const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount && !accounts.includes(newAccount)) {
-                    accounts.push(newAccount);
-                    updateLocalStorage();
-                    populateAccountSelect();
+                if (newAccount && !accounts.includes(newAccount.toLowerCase())) {
+                    accounts.push(newAccount.toLowerCase());
+                    const option = document.createElement('option');
+                    option.value = newAccount.toLowerCase();
+                    option.innerText = newAccount.charAt(0).toUpperCase() + newAccount.slice(1);
+                    accountSelect.appendChild(option);
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                } else {
+                    alert('Jalur transaksi sudah ada atau nama tidak valid.');
                 }
             });
 
+            accounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.toLowerCase();
+                option.innerText = account.charAt(0).toUpperCase() + account.slice(1);
+                accountSelect.appendChild(option);
+            });
+
             init();
-
-            form.addEventListener('submit', addTransaction);
         });
-
-        function confirmRemoveTransaction(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                removeTransaction(id);
-            }
-        }
-
-        function removeTransaction(id) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions = transactions.filter(transaction => transaction.id !== id);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            document.location.reload();
-        }
     </script>
 </body>
 </html>
