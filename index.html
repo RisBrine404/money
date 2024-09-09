@@ -115,18 +115,32 @@
         }
 
         #scroll-up-btn, #scroll-down-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            margin: 10px 0;
-            cursor: pointer;
-            width: 100%;
-        }
+    position: fixed;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
 
-        #scroll-up-btn:hover, #scroll-down-btn:hover {
-            background-color: #0056b3;
-        }
+#scroll-up-btn {
+    bottom: 80px; /* Adjust position for the "up" button */
+}
+
+#scroll-down-btn {
+    bottom: 20px; /* Adjust position for the "down" button */
+}
+
+#scroll-up-btn:hover, #scroll-down-btn:hover {
+    background-color: #0056b3;
+}
     </style>
 </head>
 <body>
