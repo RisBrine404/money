@@ -113,31 +113,6 @@
         .delete-btn:hover {
             background: #c82333;
         }
-
-        .scroll-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            padding: 10px;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .scroll-btn:hover {
-            background-color: #0056b3;
-        }
-
-        #scroll-up-btn {
-            bottom: 70px;
-        }
-
-        #scroll-down-btn {
-            bottom: 20px;
-        }
     </style>
 </head>
 <body>
@@ -179,12 +154,6 @@
                 </tr>
             </tbody>
         </table>
-
-        <div class="form-group">
-            <label for="search">Cari Transaksi:</label>
-            <input type="text" id="search" placeholder="Masukkan kata kunci...">
-        </div>
-
         <form id="transaction-form">
             <div class="form-group">
                 <label for="date">Tanggal:</label>
@@ -217,19 +186,13 @@
             </div>
             <button type="submit">Tambah</button>
         </form>
-
         <button id="add-account-btn">Tambah Jalur Transaksi Baru</button>
-
         <h2>Riwayat Transaksi</h2>
         <ul id="transaction-list"></ul>
     </div>
     <footer>
         <p>&copy; 2024 Zulkifli Risky Febriansyah</p>
     </footer>
-
-    <button id="scroll-up-btn" class="scroll-btn">↑</button>
-    <button id="scroll-down-btn" class="scroll-btn">↓</button>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('transaction-form');
@@ -242,17 +205,9 @@
             const balanceGoPay = document.getElementById('gopay-balance');
             const addAccountBtn = document.getElementById('add-account-btn');
             const accountSelect = document.getElementById('account');
-            const searchInput = document.getElementById('search');
-            const scrollUpBtn = document.getElementById('scroll-up-btn');
-            const scrollDownBtn = document.getElementById('scroll-down-btn');
 
             let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
             let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
-
-            // Fungsi untuk menambahkan titik pada angka rupiah
-            function formatRupiah(number) {
-                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            }
 
             function addTransaction(e) {
                 e.preventDefault();
@@ -288,45 +243,20 @@
                 const sign = transaction.type === 'income' ? '+' : '-';
                 const item = document.createElement('li');
 
-                // Menentukan kelas berdasarkan tipe transaksi
                 item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
 
-                // Menambahkan elemen transaksi ke dalam DOM
                 item.innerHTML = `
-                    ${transaction.date} - ${transaction.comment} 
-                    <span>${sign} Rp ${formatRupiah(Math.abs(transaction.amount))}</span>
-                    <button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
+                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
+                    <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
                 `;
 
                 transactionList.appendChild(item);
             }
 
-            function updateBalances() {
-                const total = transactions.reduce((acc, transaction) => {
-                    return transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount;
-                }, 0);
-
-                const cash = calculateBalance('cash');
-                const bank = calculateBalance('bank');
-                const dana = calculateBalance('dana');
-                const shopee = calculateBalance('shopee');
-                const gopay = calculateBalance('gopay');
-
-                // Menampilkan hasil dengan format rupiah
-                balanceTotal.innerText = `Rp ${formatRupiah(total)}`;
-                balanceCash.innerText = `Rp ${formatRupiah(cash)}`;
-                balanceBank.innerText = `Rp ${formatRupiah(bank)}`;
-                balanceDana.innerText = `Rp ${formatRupiah(dana)}`;
-                balanceShopee.innerText = `Rp ${formatRupiah(shopee)}`;
-                balanceGoPay.innerText = `Rp ${formatRupiah(gopay)}`;
-            }
-
-            function calculateBalance(account) {
-                return transactions
-                    .filter(transaction => transaction.account === account)
-                    .reduce((acc, transaction) => {
-                        return transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount;
-                    }, 0);
+            function confirmRemoveTransaction(id) {
+                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                    removeTransaction(id);
+                }
             }
 
             function removeTransaction(id) {
@@ -335,49 +265,84 @@
                 init();
             }
 
+            function formatCurrency(amount) {
+                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            function updateBalances() {
+                const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const total = amounts.reduce((acc, amount) => acc + amount, 0);
+                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
+
+                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
+
+                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
+
+                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
+
+                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
+
+                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
+                balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
+            }
+
             function updateLocalStorage() {
                 localStorage.setItem('transactions', JSON.stringify(transactions));
+                localStorage.setItem('accounts', JSON.stringify(accounts));
             }
 
             function init() {
                 transactionList.innerHTML = '';
                 transactions.forEach(addTransactionDOM);
                 updateBalances();
+                populateAccountSelect();
             }
 
-            form.addEventListener('submit', addTransaction);
+            function populateAccountSelect() {
+                accountSelect.innerHTML = '';
+                accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account;
+                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
+                    accountSelect.appendChild(option);
+                });
+            }
 
             addAccountBtn.addEventListener('click', () => {
                 const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount) {
+                if (newAccount && !accounts.includes(newAccount)) {
                     accounts.push(newAccount);
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
-                    const option = document.createElement('option');
-                    option.value = newAccount.toLowerCase();
-                    option.text = newAccount;
-                    accountSelect.appendChild(option);
+                    updateLocalStorage();
+                    populateAccountSelect();
                 }
             });
 
-            searchInput.addEventListener('input', () => {
-                const keyword = searchInput.value.toLowerCase();
-                const filteredTransactions = transactions.filter(transaction =>
-                    transaction.comment.toLowerCase().includes(keyword) || transaction.date.includes(keyword)
-                );
-                transactionList.innerHTML = '';
-                filteredTransactions.forEach(addTransactionDOM);
-            });
-
-            scrollUpBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
-            scrollDownBtn.addEventListener('click', () => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            });
-
             init();
+
+            form.addEventListener('submit', addTransaction);
         });
+
+        function confirmRemoveTransaction(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                removeTransaction(id);
+            }
+        }
+
+        function removeTransaction(id) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions = transactions.filter(transaction => transaction.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            document.location.reload();
+        }
     </script>
 </body>
-</html>
+    </html>
