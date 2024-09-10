@@ -249,6 +249,11 @@
             let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
             let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
 
+            // Fungsi untuk menambahkan titik pada angka rupiah
+            function formatRupiah(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
             function addTransaction(e) {
                 e.preventDefault();
 
@@ -282,45 +287,46 @@
             function addTransactionDOM(transaction) {
                 const sign = transaction.type === 'income' ? '+' : '-';
                 const item = document.createElement('li');
+
+                // Menentukan kelas berdasarkan tipe transaksi
                 item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
 
+                // Menambahkan elemen transaksi ke dalam DOM
                 item.innerHTML = `
-                    ${transaction.date} - ${transaction.comment} (${transaction.account}) 
-                    <span>${sign}Rp ${Math.abs(transaction.amount)}</span>
+                    ${transaction.date} - ${transaction.comment} 
+                    <span>${sign} Rp ${formatRupiah(Math.abs(transaction.amount))}</span>
                     <button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
                 `;
+
                 transactionList.appendChild(item);
             }
 
             function updateBalances() {
-                const income = transactions
-                    .filter(transaction => transaction.type === 'income')
-                    .reduce((sum, transaction) => sum + transaction.amount, 0);
-                
-                const expense = transactions
-                    .filter(transaction => transaction.type === 'expense')
-                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+                const total = transactions.reduce((acc, transaction) => {
+                    return transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount;
+                }, 0);
 
-                const total = income - expense;
+                const cash = calculateBalance('cash');
+                const bank = calculateBalance('bank');
+                const dana = calculateBalance('dana');
+                const shopee = calculateBalance('shopee');
+                const gopay = calculateBalance('gopay');
 
-                balanceTotal.innerText = `Rp ${total}`;
-                balanceCash.innerText = `Rp ${calculateBalance('cash')}`;
-                balanceBank.innerText = `Rp ${calculateBalance('bank')}`;
-                balanceDana.innerText = `Rp ${calculateBalance('dana')}`;
-                balanceShopee.innerText = `Rp ${calculateBalance('shopee')}`;
-                balanceGoPay.innerText = `Rp ${calculateBalance('gopay')}`;
+                // Menampilkan hasil dengan format rupiah
+                balanceTotal.innerText = `Rp ${formatRupiah(total)}`;
+                balanceCash.innerText = `Rp ${formatRupiah(cash)}`;
+                balanceBank.innerText = `Rp ${formatRupiah(bank)}`;
+                balanceDana.innerText = `Rp ${formatRupiah(dana)}`;
+                balanceShopee.innerText = `Rp ${formatRupiah(shopee)}`;
+                balanceGoPay.innerText = `Rp ${formatRupiah(gopay)}`;
             }
 
             function calculateBalance(account) {
-                const income = transactions
-                    .filter(transaction => transaction.type === 'income' && transaction.account === account)
-                    .reduce((sum, transaction) => sum + transaction.amount, 0);
-                
-                const expense = transactions
-                    .filter(transaction => transaction.type === 'expense' && transaction.account === account)
-                    .reduce((sum, transaction) => sum + transaction.amount, 0);
-
-                return income - expense;
+                return transactions
+                    .filter(transaction => transaction.account === account)
+                    .reduce((acc, transaction) => {
+                        return transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount;
+                    }, 0);
             }
 
             function removeTransaction(id) {
@@ -339,40 +345,29 @@
                 updateBalances();
             }
 
-            function addNewAccount() {
-                const newAccount = prompt("Masukkan nama jalur transaksi baru:");
-                if (newAccount && !accounts.includes(newAccount)) {
+            form.addEventListener('submit', addTransaction);
+
+            addAccountBtn.addEventListener('click', () => {
+                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
+                if (newAccount) {
                     accounts.push(newAccount);
-                    updateAccountSelect();
-                    updateLocalStorageAccounts();
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                    const option = document.createElement('option');
+                    option.value = newAccount.toLowerCase();
+                    option.text = newAccount;
+                    accountSelect.appendChild(option);
                 }
-            }
+            });
 
-            function updateAccountSelect() {
-                accountSelect.innerHTML = accounts
-                    .map(account => `<option value="${account}">${account.charAt(0).toUpperCase() + account.slice(1)}</option>`)
-                    .join('');
-            }
-
-            function updateLocalStorageAccounts() {
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-            }
-
-            addAccountBtn.addEventListener('click', addNewAccount);
-
-            // Searching for transactions
             searchInput.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
+                const keyword = searchInput.value.toLowerCase();
                 const filteredTransactions = transactions.filter(transaction =>
-                    transaction.comment.toLowerCase().includes(query) ||
-                    transaction.account.toLowerCase().includes(query) ||
-                    transaction.date.includes(query)
+                    transaction.comment.toLowerCase().includes(keyword) || transaction.date.includes(keyword)
                 );
                 transactionList.innerHTML = '';
                 filteredTransactions.forEach(addTransactionDOM);
             });
 
-            // Scroll up and down buttons
             scrollUpBtn.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -382,18 +377,7 @@
             });
 
             init();
-            updateAccountSelect();
         });
-
-        function removeTransaction(id) {
-            const confirmation = confirm('Apakah Anda yakin ingin menghapus transaksi ini?');
-            if (confirmation) {
-                const transactionIndex = transactions.findIndex(transaction => transaction.id === id);
-                transactions.splice(transactionIndex, 1);
-                updateLocalStorage();
-                init();
-            }
-        }
     </script>
 </body>
-  </html>
+</html>
