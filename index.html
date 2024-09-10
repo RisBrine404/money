@@ -1,351 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catatan Keuangan Pribadi</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        header, footer {
-            background: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input, select, button, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        .balance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .balance-table th, .balance-table td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-
-        .balance-table th {
-            background: #f4f4f4;
-        }
-
-        #transaction-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #transaction-list li {
-            background: #fff;
-            border-left: 5px solid;
-            margin: 10px 0;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .income {
-            border-color: #28a745;
-        }
-
-        .expense {
-            border-color: #dc3545;
-        }
-
-        .delete-btn {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .delete-btn:hover {
-            background: #c82333;
-        }
-
-        #scroll-up-btn, #scroll-down-btn {
-    position: fixed;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-#scroll-up-btn {
-    bottom: 80px; /* Adjust position for the "up" button */
-}
-
-#scroll-down-btn {
-    bottom: 20px; /* Adjust position for the "down" button */
-}
-
-#scroll-up-btn:hover, #scroll-down-btn:hover {
-    background-color: #0056b3;
-}
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Catatan Keuangan Pribadi</h1>
-    </header>
-    <div class="container">
-        <table class="balance-table">
-            <thead>
-                <tr>
-                    <th>Jenis Saldo</th>
-                    <th>Nominal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Saldo Keseluruhan</td>
-                    <td id="total-balance">Rp 0</td>
-                </tr>
-                <tr>
-                    <td>Saldo Cash</td>
-                    <td id="cash-balance">Rp 0</td>
-                </tr>
-                <tr>
-                    <td>Saldo Bank Mandiri</td>
-                    <td id="bank-balance">Rp 0</td>
-                </tr>
-                <tr>
-                    <td>Saldo Dana</td>
-                    <td id="dana-balance">Rp 0</td>
-                </tr>
-                <tr>
-                    <td>Saldo Shopee</td>
-                    <td id="shopee-balance">Rp 0</td>
-                </tr>
-                <tr>
-                    <td>Saldo GoPay</td>
-                    <td id="gopay-balance">Rp 0</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="form-group">
-            <label for="search">Cari Transaksi:</label>
-            <input type="text" id="search" placeholder="Masukkan kata kunci...">
-        </div>
-
-        <form id="transaction-form">
-            <div class="form-group">
-                <label for="date">Tanggal:</label>
-                <input type="date" id="date" required>
-            </div>
-            <div class="form-group">
-                <label for="amount">Jumlah:</label>
-                <input type="number" id="amount" required>
-            </div>
-            <div class="form-group">
-                <label for="type">Tipe:</label>
-                <select id="type" required>
-                    <option value="income">Pemasukan</option>
-                    <option value="expense">Pengeluaran</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="account">Jalur Transaksi:</label>
-                <select id="account" required>
-                    <option value="cash">Cash</option>
-                    <option value="bank">Bank Mandiri</option>
-                    <option value="dana">Dana</option>
-                    <option value="shopee">Shopee</option>
-                    <option value="gopay">GoPay</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="comment">Komentar:</label>
-                <textarea id="comment" rows="3" required></textarea>
-            </div>
-            <button type="submit">Tambah</button>
-        </form>
-
-        <button id="add-account-btn">Tambah Jalur Transaksi Baru</button>
-
-        <button id="scroll-up-btn">Slip ke Atas</button>
-        <button id="scroll-down-btn">Slip ke Bawah</button>
-
-        <h2>Riwayat Transaksi</h2>
-        <ul id="transaction-list"></ul>
-    </div>
-    <footer>
-        <p>&copy; 2024 Zulkifli Risky Febriansyah</p>
-    </footer>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('transaction-form');
-            const transactionList = document.getElementById('transaction-list');
-            const balanceTotal = document.getElementById('total-balance');
-            const balanceCash = document.getElementById('cash-balance');
-            const balanceBank = document.getElementById('bank-balance');
-            const balanceDana = document.getElementById('dana-balance');
-            const balanceShopee = document.getElementById('shopee-balance');
-            const balanceGoPay = document.getElementById('gopay-balance');
-            const addAccountBtn = document.getElementById('add-account-btn');
-            const accountSelect = document.getElementById('account');
-            const searchInput = document.getElementById('search');
-            const scrollUpBtn = document.getElementById('scroll-up-btn');
-            const scrollDownBtn = document.getElementById('scroll-down-btn');
-
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
-
-            function addTransaction(e) {
-                e.preventDefault();
-
-                const date = document.getElementById('date').value;
-                const amount = document.getElementById('amount').value;
-                const type = document.getElementById('type').value;
-                const account = document.getElementById('account').value;
-                const comment = document.getElementById('comment').value;
-
-                const transaction = {
-                    id: generateID(),
-                    date,
-                    amount: +amount,
-                    type,
-                    account,
-                    comment
-                };
-
-                transactions.push(transaction);
-                addTransactionDOM(transaction);
-                updateBalances();
-                updateLocalStorage();
-
-                form.reset();
-            }
-
-            function generateID() {
-                return Math.floor(Math.random() * 1000000000);
-            }
-
-            function addTransactionDOM(transaction) {
-                const sign = transaction.type === 'income' ? '+' : '-';
-                const item = document.createElement('li');
-
-                item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
-
-                item.innerHTML = `
-                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
-                    <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
+Transaction(${transaction.id})">x</button>
                 `;
-
                 transactionList.appendChild(item);
             }
 
-            function confirmRemoveTransaction(id) {
-                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                    removeTransaction(id);
-                }
+            function updateBalances() {
+                const income = transactions
+                    .filter(transaction => transaction.type === 'income')
+                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+                
+                const expense = transactions
+                    .filter(transaction => transaction.type === 'expense')
+                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+                const total = income - expense;
+
+                balanceTotal.innerText = `Rp ${total}`;
+                balanceCash.innerText = `Rp ${calculateBalance('cash')}`;
+                balanceBank.innerText = `Rp ${calculateBalance('bank')}`;
+                balanceDana.innerText = `Rp ${calculateBalance('dana')}`;
+                balanceShopee.innerText = `Rp ${calculateBalance('shopee')}`;
+                balanceGoPay.innerText = `Rp ${calculateBalance('gopay')}`;
+            }
+
+            function calculateBalance(account) {
+                const income = transactions
+                    .filter(transaction => transaction.type === 'income' && transaction.account === account)
+                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+                
+                const expense = transactions
+                    .filter(transaction => transaction.type === 'expense' && transaction.account === account)
+                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+                return income - expense;
             }
 
             function removeTransaction(id) {
                 transactions = transactions.filter(transaction => transaction.id !== id);
                 updateLocalStorage();
                 init();
-            }
-
-            function updateBalances() {
-                const total = transactions.reduce((acc, transaction) => 
-                    transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                const cashBalance = transactions
-                    .filter(t => t.account === 'cash')
-                    .reduce((acc, transaction) => 
-                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                const bankBalance = transactions
-                    .filter(t => t.account === 'bank')
-                    .reduce((acc, transaction) => 
-                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                const danaBalance = transactions
-                    .filter(t => t.account === 'dana')
-                    .reduce((acc, transaction) => 
-                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                const shopeeBalance = transactions
-                    .filter(t => t.account === 'shopee')
-                    .reduce((acc, transaction) => 
-                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                const gopayBalance = transactions
-                    .filter(t => t.account === 'gopay')
-                    .reduce((acc, transaction) => 
-                        transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount, 0);
-
-                balanceTotal.innerText = `Rp ${formatCurrency(total)}`;
-                balanceCash.innerText = `Rp ${formatCurrency(cashBalance)}`;
-                balanceBank.innerText = `Rp ${formatCurrency(bankBalance)}`;
-                balanceDana.innerText = `Rp ${formatCurrency(danaBalance)}`;
-                balanceShopee.innerText = `Rp ${formatCurrency(shopeeBalance)}`;
-                balanceGoPay.innerText = `Rp ${formatCurrency(gopayBalance)}`;
-            }
-
-            function formatCurrency(amount) {
-                return amount.toLocaleString('id-ID');
             }
 
             function updateLocalStorage() {
@@ -358,20 +50,40 @@
                 updateBalances();
             }
 
-            form.addEventListener('submit', addTransaction);
-
-            function searchTransactions() {
-                const keyword = searchInput.value.toLowerCase();
-                const filteredTransactions = transactions.filter(transaction => 
-                    transaction.comment.toLowerCase().includes(keyword) ||
-                    transaction.account.toLowerCase().includes(keyword));
-
-                transactionList.innerHTML = '';
-                filteredTransactions.forEach(addTransactionDOM);
+            function addNewAccount() {
+                const newAccount = prompt("Masukkan nama jalur transaksi baru:");
+                if (newAccount && !accounts.includes(newAccount)) {
+                    accounts.push(newAccount);
+                    updateAccountSelect();
+                    updateLocalStorageAccounts();
+                }
             }
 
-            searchInput.addEventListener('input', searchTransactions);
+            function updateAccountSelect() {
+                accountSelect.innerHTML = accounts
+                    .map(account => `<option value="${account}">${account.charAt(0).toUpperCase() + account.slice(1)}</option>`)
+                    .join('');
+            }
 
+            function updateLocalStorageAccounts() {
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+            }
+
+            addAccountBtn.addEventListener('click', addNewAccount);
+
+            // Searching for transactions
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                const filteredTransactions = transactions.filter(transaction =>
+                    transaction.comment.toLowerCase().includes(query) ||
+                    transaction.account.toLowerCase().includes(query) ||
+                    transaction.date.includes(query)
+                );
+                transactionList.innerHTML = '';
+                filteredTransactions.forEach(addTransactionDOM);
+            });
+
+            // Scroll up and down buttons
             scrollUpBtn.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -380,29 +92,19 @@
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             });
 
-            addAccountBtn.addEventListener('click', () => {
-                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount && !accounts.includes(newAccount.toLowerCase())) {
-                    accounts.push(newAccount.toLowerCase());
-                    const option = document.createElement('option');
-                    option.value = newAccount.toLowerCase();
-                    option.innerText = newAccount.charAt(0).toUpperCase() + newAccount.slice(1);
-                    accountSelect.appendChild(option);
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
-                } else {
-                    alert('Jalur transaksi sudah ada atau nama tidak valid.');
-                }
-            });
-
-            accounts.forEach(account => {
-                const option = document.createElement('option');
-                option.value = account.toLowerCase();
-                option.innerText = account.charAt(0).toUpperCase() + account.slice(1);
-                accountSelect.appendChild(option);
-            });
-
             init();
+            updateAccountSelect();
         });
+
+        function removeTransaction(id) {
+            const confirmation = confirm('Apakah Anda yakin ingin menghapus transaksi ini?');
+            if (confirmation) {
+                const transactionIndex = transactions.findIndex(transaction => transaction.id === id);
+                transactions.splice(transactionIndex, 1);
+                updateLocalStorage();
+                init();
+            }
+        }
     </script>
 </body>
 </html>
