@@ -120,6 +120,11 @@
         <h1>Catatan Keuangan Pribadi</h1>
     </header>
     <div class="container">
+        <!-- Form Pencarian -->
+        <form id="search-form">
+            <input type="text" id="search" placeholder="Cari transaksi..." oninput="filterTransactions()">
+        </form>
+        
         <table class="balance-table">
             <thead>
                 <tr>
@@ -154,6 +159,7 @@
                 </tr>
             </tbody>
         </table>
+        
         <form id="transaction-form">
             <div class="form-group">
                 <label for="date">Tanggal:</label>
@@ -186,7 +192,9 @@
             </div>
             <button type="submit">Tambah</button>
         </form>
+        
         <button id="add-account-btn">Tambah Jalur Transaksi Baru</button>
+        
         <h2>Riwayat Transaksi</h2>
         <ul id="transaction-list"></ul>
     </div>
@@ -278,19 +286,23 @@
                 const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
 
-                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction =>
+                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
 
-                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction =>
+                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
 
-                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction =>
+                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
 
-                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction =>
+                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
                 balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
             }
@@ -304,10 +316,19 @@
                 transactionList.innerHTML = '';
                 transactions.forEach(addTransactionDOM);
                 updateBalances();
-                populateAccountSelect();
             }
 
-            function populateAccountSelect() {
+            // Fungsi untuk menambahkan jalur transaksi baru
+            addAccountBtn.addEventListener('click', () => {
+                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
+                if (newAccount) {
+                    accounts.push(newAccount);
+                    updateLocalStorage();
+                    renderAccountOptions();
+                }
+            });
+
+            function renderAccountOptions() {
                 accountSelect.innerHTML = '';
                 accounts.forEach(account => {
                     const option = document.createElement('option');
@@ -317,32 +338,22 @@
                 });
             }
 
-            addAccountBtn.addEventListener('click', () => {
-                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount && !accounts.includes(newAccount)) {
-                    accounts.push(newAccount);
-                    updateLocalStorage();
-                    populateAccountSelect();
-                }
-            });
+            // Fungsi untuk memfilter transaksi berdasarkan input pencarian
+            function filterTransactions() {
+                const searchValue = document.getElementById('search').value.toLowerCase();
+                const filteredTransactions = transactions.filter(transaction => 
+                    transaction.comment.toLowerCase().includes(searchValue) ||
+                    transaction.account.toLowerCase().includes(searchValue)
+                );
 
-            init();
+                transactionList.innerHTML = '';
+                filteredTransactions.forEach(addTransactionDOM);
+            }
 
             form.addEventListener('submit', addTransaction);
+            renderAccountOptions();
+            init();
         });
-
-        function confirmRemoveTransaction(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                removeTransaction(id);
-            }
-        }
-
-        function removeTransaction(id) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions = transactions.filter(transaction => transaction.id !== id);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            document.location.reload();
-        }
     </script>
 </body>
     </html>
