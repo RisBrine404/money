@@ -120,11 +120,6 @@
         <h1>Catatan Keuangan Pribadi</h1>
     </header>
     <div class="container">
-        <!-- Form Pencarian -->
-        <form id="search-form">
-            <input type="text" id="search" placeholder="Cari transaksi..." oninput="filterTransactions()">
-        </form>
-        
         <table class="balance-table">
             <thead>
                 <tr>
@@ -159,7 +154,6 @@
                 </tr>
             </tbody>
         </table>
-        
         <form id="transaction-form">
             <div class="form-group">
                 <label for="date">Tanggal:</label>
@@ -192,10 +186,16 @@
             </div>
             <button type="submit">Tambah</button>
         </form>
-        
         <button id="add-account-btn">Tambah Jalur Transaksi Baru</button>
         
         <h2>Riwayat Transaksi</h2>
+        
+        <!-- Kolom Pencarian -->
+        <div class="form-group">
+            <label for="search">Cari Transaksi:</label>
+            <input type="text" id="search" placeholder="Cari berdasarkan komentar atau jalur transaksi...">
+        </div>
+        
         <ul id="transaction-list"></ul>
     </div>
     <footer>
@@ -205,6 +205,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('transaction-form');
             const transactionList = document.getElementById('transaction-list');
+            const searchInput = document.getElementById('search');
             const balanceTotal = document.getElementById('total-balance');
             const balanceCash = document.getElementById('cash-balance');
             const balanceBank = document.getElementById('bank-balance');
@@ -280,31 +281,27 @@
             function updateBalances() {
                 const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const total = amounts.reduce((acc, amount) => acc + amount, 0);
-                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
+                balanceTotal.innerText = `Rp ${formatCurrency(total)}`;
 
-                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const cashAmounts = transactions.filter(transaction => transaction.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
+                balanceCash.innerText = `Rp ${formatCurrency(cashTotal)}`;
 
-                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction =>
-                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const bankAmounts = transactions.filter(transaction => transaction.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
+                balanceBank.innerText = `Rp ${formatCurrency(bankTotal)}`;
 
-                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction =>
-                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const danaAmounts = transactions.filter(transaction => transaction.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
+                balanceDana.innerText = `Rp ${formatCurrency(danaTotal)}`;
 
-                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction =>
-                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const shopeeAmounts = transactions.filter(transaction => transaction.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
+                balanceShopee.innerText = `Rp ${formatCurrency(shopeeTotal)}`;
 
-                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction =>
-                    transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                const gopayAmounts = transactions.filter(transaction => transaction.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
                 const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
+                balanceGoPay.innerText = `Rp ${formatCurrency(gopayTotal)}`;
             }
 
             function updateLocalStorage() {
@@ -318,42 +315,38 @@
                 updateBalances();
             }
 
-            // Fungsi untuk menambahkan jalur transaksi baru
-            addAccountBtn.addEventListener('click', () => {
+            function addNewAccount() {
                 const newAccount = prompt('Masukkan nama jalur transaksi baru:');
                 if (newAccount) {
                     accounts.push(newAccount);
+                    updateAccountOptions();
                     updateLocalStorage();
-                    renderAccountOptions();
                 }
-            });
-
-            function renderAccountOptions() {
-                accountSelect.innerHTML = '';
-                accounts.forEach(account => {
-                    const option = document.createElement('option');
-                    option.value = account;
-                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
-                    accountSelect.appendChild(option);
-                });
             }
 
-            // Fungsi untuk memfilter transaksi berdasarkan input pencarian
+            function updateAccountOptions() {
+                accountSelect.innerHTML = accounts.map(account => `<option value="${account}">${account}</option>`).join('');
+            }
+
             function filterTransactions() {
-                const searchValue = document.getElementById('search').value.toLowerCase();
+                const searchTerm = searchInput.value.toLowerCase();
+                transactionList.innerHTML = '';
+
                 const filteredTransactions = transactions.filter(transaction => 
-                    transaction.comment.toLowerCase().includes(searchValue) ||
-                    transaction.account.toLowerCase().includes(searchValue)
+                    transaction.comment.toLowerCase().includes(searchTerm) || 
+                    transaction.account.toLowerCase().includes(searchTerm)
                 );
 
-                transactionList.innerHTML = '';
                 filteredTransactions.forEach(addTransactionDOM);
             }
 
             form.addEventListener('submit', addTransaction);
-            renderAccountOptions();
+            addAccountBtn.addEventListener('click', addNewAccount);
+            searchInput.addEventListener('input', filterTransactions);
+
             init();
+            updateAccountOptions();
         });
     </script>
 </body>
-    </html>
+                    </html>
