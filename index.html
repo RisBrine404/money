@@ -113,9 +113,31 @@
         .delete-btn:hover {
             background: #c82333;
         }
+        .act-btn{
+    background: rgb(0, 204, 51);
+    display: block;
+    width: 50px;
+    height: 38px;
+    line-height: 1px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    -webkit-border-radius: 40%;
+    text-decoration: none;
+    transition: ease all 0.3s;
+    position: fixed;
+    right: 20px;
+    bottom: 30px;
+  }
+  
+  .act-btn:hover{
+    background: rgb(7, 4, 196)
+            }
     </style>
 </head>
 <body>
+    <button onclick="toggleBackgroundColor()"class="act-btn">Search</button>
     <header>
         <h1>Catatan Keuangan Pribadi</h1>
     </header>
