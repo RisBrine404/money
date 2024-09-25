@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Transaksi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header, footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .balance-table {
+            display: none;
+        }
+
+        #transaction-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #transaction-list li {
+            background: #fff;
+            border-left: 5px solid;
+            margin: 10px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .income {
+            border-color: #28a745;
+        }
+
+        .expense {
+            border-color: #dc3545;
+        }
+
+        .edit-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Riwayat Transaksi</h1>
+    </header>
+    <div class="container">
+        <h2>Riwayat Transaksi</h2>
+        <ul id="transaction-list"></ul>
+    </div>
+    <footer>
+        <p>&copy; 2024 Zulkifli Risky Febriansyah</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const transactionList = document.getElementById('transaction-list');
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+            function addTransactionDOM(transaction) {
+                const sign = transaction.type === 'income' ? '+' : '-';
+                const item = document.createElement('li');
+
+                item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
+
+                item.innerHTML = `
+                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
+                    <button class="edit-btn" onclick="editTransaction(${transaction.id})">Edit</button>
+                `;
+
+                transactionList.appendChild(item);
+            }
+
+            function formatCurrency(amount) {
+                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            function init() {
+                transactionList.innerHTML = '';
+                transactions.forEach(addTransactionDOM);
+            }
+
+            window.editTransaction = function(id) {
+                const transaction = transactions.find(transaction => transaction.id === id);
+                if (transaction) {
+                    const newAmount = prompt("Edit jumlah transaksi:", transaction.amount);
+                    if (newAmount !== null) {
+                        transaction.amount = +newAmount;
+                        localStorage.setItem('transactions', JSON.stringify(transactions));
+                        init();
+                    }
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
