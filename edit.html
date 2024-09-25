@@ -84,8 +84,12 @@
         <h1>Riwayat Transaksi</h1>
     </header>
     <div class="container">
-        <input type="text" id="search" placeholder="Cari transaksi..." onkeyup="searchTransaction()">
+        
         <h2>Riwayat Transaksi</h2>
+        <div class="form-group">
+            <label for="search">Cari Transaksi:</label>
+            <input type="text" id="search" placeholder="Cari berdasarkan komentar atau jalur transaksi..." onkeyup="searchTransaction()">
+        </div>
         <ul id="transaction-list"></ul>
     </div>
     <footer>
