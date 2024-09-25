@@ -122,8 +122,11 @@
             window.editTransaction = function(id) {
                 const transaction = transactions.find(transaction => transaction.id === id);
                 if (transaction) {
+                    const newComment = prompt("Edit komentar transaksi:", transaction.comment);
                     const newAmount = prompt("Edit jumlah transaksi:", transaction.amount);
-                    if (newAmount !== null) {
+
+                    if (newComment !== null && newAmount !== null) {
+                        transaction.comment = newComment;
                         transaction.amount = +newAmount;
                         localStorage.setItem('transactions', JSON.stringify(transactions));
                         init();
