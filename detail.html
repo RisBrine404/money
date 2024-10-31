@@ -3,20 +3,29 @@
   <head>
     <title>Galery Memory ZRF</title>
     <style>
+      /* Menambah ukuran tabel dan gaya */
       .balance-table {
-        width: 100%;
+        width: 80%; /* Menambah lebar tabel */
         border-collapse: collapse;
-        margin-bottom: 20px;
+        margin: 20px auto; /* Menempatkan tabel di tengah */
+        font-size: 18px; /* Ukuran font lebih besar */
       }
 
       .balance-table th, .balance-table td {
         border: 1px solid #ccc;
-        padding: 10px;
+        padding: 15px; /* Padding lebih besar */
         text-align: left;
       }
 
       .balance-table th {
         background: #f4f4f4;
+        font-weight: bold;
+      }
+
+      /* Gaya khusus untuk baris Total */
+      .balance-table tr:last-child td {
+        font-weight: bold;
+        background-color: #e8f4fa;
       }
     </style>
   </head>
@@ -46,7 +55,7 @@
           <td>Rp 3.897.951</td>
         </tr>
         <tr>
-          <td><strong>Total</strong></td>
+          <td>Total</td>
           <td id="total">Rp 0</td>
         </tr>
       </tbody>
@@ -74,4 +83,4 @@
       calculateTotal();
     </script>
   </body>
-</html>
+    </html>
