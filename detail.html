@@ -1,53 +1,77 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Galery Memory ZRF</title>
     <style>
       .balance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
 
-        .balance-table th, .balance-table td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
+      .balance-table th, .balance-table td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+      }
 
-        .balance-table th {
-            background: #f4f4f4;
-        }</style>
+      .balance-table th {
+        background: #f4f4f4;
+      }
+    </style>
   </head>
   <body>
-    <table class="balance-table">
-            <thead>
-                <tr>
-                    <th>Penghasilan</th>
-                    <th>Nominal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Gaji UG Arta Mandiri</td>
-                    <td>Rp 3.369.344</td>
-                </tr>
-                <tr>
-                    <td>Gaji UG Arta Mandiri</td>
-                    <td>Rp 3.477.950</td>
-                </tr>
-                <tr>
-                    <td>Gaji UG Arta Mandiri</td>
-                    <td>Rp 3.702.951</td>
-                </tr>
-                <tr>
-                    <td>Gaji UG Arta Mandiri</td>
-                    <td>Rp 3.897.951</td>
-                </tr>
-                <tr>
-                    <td>Jumlah</td>
-                    <td>Rp 0</td>
-                </tr>
-            </tbody>
-        </table>
+    <table class="balance-table" id="balance-table">
+      <thead>
+        <tr>
+          <th>Penghasilan</th>
+          <th>Nominal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gaji UG Arta Mandiri</td>
+          <td>Rp 3.369.344</td>
+        </tr>
+        <tr>
+          <td>Gaji UG Arta Mandiri</td>
+          <td>Rp 3.477.950</td>
+        </tr>
+        <tr>
+          <td>Gaji UG Arta Mandiri</td>
+          <td>Rp 3.702.951</td>
+        </tr>
+        <tr>
+          <td>Gaji UG Arta Mandiri</td>
+          <td>Rp 3.897.951</td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td id="total">Rp 0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      function calculateTotal() {
+        const rows = document.querySelectorAll("#balance-table tbody tr");
+        let total = 0;
+
+        rows.forEach((row, index) => {
+          if (index < rows.length - 1) { // Lewati baris terakhir (baris total)
+            const cellText = row.cells[1].textContent.replace("Rp ", "").replace(/\./g, "");
+            const nominal = parseInt(cellText, 10);
+            total += nominal;
+          }
+        });
+
+        // Format total dalam mata uang Indonesia
+        const formattedTotal = new Intl.NumberFormat('id-ID').format(total);
+        document.getElementById("total").textContent = "Rp " + formattedTotal;
+      }
+
+      // Hitung total saat halaman dimuat
+      calculateTotal();
+    </script>
   </body>
 </html>
