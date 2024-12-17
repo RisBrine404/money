@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rincian Pengeluaran Bulanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: right;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rincian Pengeluaran Bulanan</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Kategori</th>
+                <th>Detail</th>
+                <th>Jumlah (Rp)</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <tr>
+                <td rowspan="4">Kebutuhan Pokok (50%)</td>
+                <td>Makan dan Minum (masak sendiri)</td>
+                <td><input type="number" value="1100000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td>Sewa Rumah/Kost</td>
+                <td><input type="number" value="900000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td>Transportasi (motor/pribadi)</td>
+                <td><input type="number" value="300000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td>Pulsa & Internet</td>
+                <td><input type="number" value="150000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td rowspan="1">Keinginan (30%)</td>
+                <td>Hiburan (nonton, streaming, dll.)</td>
+                <td><input type="number" value="150000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td rowspan="2">Tabungan & Investasi (20%)</td>
+                <td>Transfer ke Orang Tua</td>
+                <td><input type="number" value="500000" class="jumlah" /></td>
+            </tr>
+            <tr>
+                <td>Investasi (reksadana/emas)</td>
+                <td><input type="number" value="200000" class="jumlah" /></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="2">Total</th>
+                <th id="total">3.500.000</th>
+            </tr>
+        </tfoot>
+    </table>
+    <div class="footer">
+        <p>Perencanaan keuangan sederhana © 2024</p>
+    </div>
+
+    <script>
+        // Fungsi untuk menghitung total
+        function hitungTotal() {
+            let total = 0;
+            const inputs = document.querySelectorAll('.jumlah');
+            inputs.forEach(input => {
+                const value = parseInt(input.value) || 0;
+                total += value;
+            });
+            // Update total di footer
+            document.getElementById('total').textContent = total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+        }
+
+        // Event listener untuk setiap input
+        const inputs = document.querySelectorAll('.jumlah');
+        inputs.forEach(input => {
+            input.addEventListener('input', hitungTotal);
+        });
+
+        // Hitung total saat halaman pertama kali dimuat
+        hitungTotal();
+    </script>
+</body>
+</html>
