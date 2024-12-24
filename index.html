@@ -266,143 +266,65 @@
         <p>&copy; 2024 Zulkifli Risky Febriansyah</p>
     </footer>
     <script>
-        alert("Semua Data Riwayat Transaksi Akan Tersimpan Di Local Storage");
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('transaction-form');
-            const transactionList = document.getElementById('transaction-list');
-            const balanceTotal = document.getElementById('total-balance');
-            const balanceCash = document.getElementById('cash-balance');
-            const balanceBank = document.getElementById('bank-balance');
-            const balanceDana = document.getElementById('dana-balance');
-            const balanceShopee = document.getElementById('shopee-balance');
-            const balanceGoPay = document.getElementById('gopay-balance');
-            const addAccountBtn = document.getElementById('add-account-btn');
-            const accountSelect = document.getElementById('account');
+    alert("Semua Data Riwayat Transaksi Akan Tersimpan Di Local Storage");
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('transaction-form');
+        const transactionList = document.getElementById('transaction-list');
+        const balanceTotal = document.getElementById('total-balance');
+        const balanceCash = document.getElementById('cash-balance');
+        const balanceBank = document.getElementById('bank-balance');
+        const balanceDana = document.getElementById('dana-balance');
+        const balanceShopee = document.getElementById('shopee-balance');
+        const balanceGoPay = document.getElementById('gopay-balance');
+        const addAccountBtn = document.getElementById('add-account-btn');
+        const accountSelect = document.getElementById('account');
 
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || ['cash', 'bank', 'dana', 'shopee', 'gopay'];
 
-            function addTransaction(e) {
-                e.preventDefault();
+        function addTransaction(e) {
+            e.preventDefault();
 
-                const date = document.getElementById('date').value;
-                const amount = document.getElementById('amount').value;
-                const type = document.getElementById('type').value;
-                const account = document.getElementById('account').value;
-                const comment = document.getElementById('comment').value;
+            const date = document.getElementById('date').value;
+            const amount = document.getElementById('amount').value;
+            const type = document.getElementById('type').value;
+            const account = document.getElementById('account').value;
+            const comment = document.getElementById('comment').value;
 
-                const transaction = {
-                    id: generateID(),
-                    date,
-                    amount: +amount,
-                    type,
-                    account,
-                    comment
-                };
+            const transaction = {
+                id: generateID(),
+                date,
+                amount: +amount,
+                type,
+                account,
+                comment
+            };
 
-                transactions.push(transaction);
-                addTransactionDOM(transaction);
-                updateBalances();
-                updateLocalStorage();
+            transactions.push(transaction);
+            addTransactionDOM(transaction);
+            updateBalances();
+            updateLocalStorage();
 
-                form.reset();
-            }
+            form.reset();
+        }
 
-            function generateID() {
-                return Math.floor(Math.random() * 1000000000);
-            }
+        function generateID() {
+            return Math.floor(Math.random() * 1000000000);
+        }
 
-            function addTransactionDOM(transaction) {
-                const sign = transaction.type === 'income' ? '+' : '-';
-                const item = document.createElement('li');
+        function addTransactionDOM(transaction) {
+            const sign = transaction.type === 'income' ? '+' : '-';
+            const item = document.createElement('li');
 
-                item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
+            item.classList.add(transaction.type === 'income' ? 'income' : 'expense');
 
-                item.innerHTML = `
-                    ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
-                    <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
-                `;
+            item.innerHTML = `
+                ${transaction.date} - ${transaction.comment} (${transaction.account}) <span>${sign}Rp ${formatCurrency(Math.abs(transaction.amount))}</span>
+                <button class="delete-btn" onclick="confirmRemoveTransaction(${transaction.id})">x</button>
+            `;
 
-                transactionList.appendChild(item);
-            }
-
-            function confirmRemoveTransaction(id) {
-                if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                    removeTransaction(id);
-                }
-            }
-
-            function removeTransaction(id) {
-                transactions = transactions.filter(transaction => transaction.id !== id);
-                updateLocalStorage();
-                init();
-            }
-
-            function formatCurrency(amount) {
-                return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            }
-
-            function updateBalances() {
-                const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const total = amounts.reduce((acc, amount) => acc + amount, 0);
-                balanceTotal.textContent = 'Rp ' + formatCurrency(total);
-
-                const cashAmounts = transactions.filter(t => t.account === 'cash').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const cashTotal = cashAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceCash.textContent = 'Rp ' + formatCurrency(cashTotal);
-
-                const bankAmounts = transactions.filter(t => t.account === 'bank').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const bankTotal = bankAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceBank.textContent = 'Rp ' + formatCurrency(bankTotal);
-
-                const danaAmounts = transactions.filter(t => t.account === 'dana').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const danaTotal = danaAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceDana.textContent = 'Rp ' + formatCurrency(danaTotal);
-
-                const shopeeAmounts = transactions.filter(t => t.account === 'shopee').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const shopeeTotal = shopeeAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceShopee.textContent = 'Rp ' + formatCurrency(shopeeTotal);
-
-                const gopayAmounts = transactions.filter(t => t.account === 'gopay').map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
-                const gopayTotal = gopayAmounts.reduce((acc, amount) => acc + amount, 0);
-                balanceGoPay.textContent = 'Rp ' + formatCurrency(gopayTotal);
-            }
-
-            function updateLocalStorage() {
-                localStorage.setItem('transactions', JSON.stringify(transactions));
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-            }
-
-            function init() {
-                transactionList.innerHTML = '';
-                transactions.forEach(addTransactionDOM);
-                updateBalances();
-                populateAccountSelect();
-            }
-
-            function populateAccountSelect() {
-                accountSelect.innerHTML = '';
-                accounts.forEach(account => {
-                    const option = document.createElement('option');
-                    option.value = account;
-                    option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
-                    accountSelect.appendChild(option);
-                });
-            }
-
-            addAccountBtn.addEventListener('click', () => {
-                const newAccount = prompt('Masukkan nama jalur transaksi baru:');
-                if (newAccount && !accounts.includes(newAccount)) {
-                    accounts.push(newAccount);
-                    updateLocalStorage();
-                    populateAccountSelect();
-                }
-            });
-
-            init();
-
-            form.addEventListener('submit', addTransaction);
-        });
+            transactionList.appendChild(item);
+        }
 
         function confirmRemoveTransaction(id) {
             if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
@@ -411,11 +333,77 @@
         }
 
         function removeTransaction(id) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
             transactions = transactions.filter(transaction => transaction.id !== id);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            document.location.reload();
+            updateLocalStorage();
+            init();
         }
-    </script>
+
+        function formatCurrency(amount) {
+            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function updateBalances() {
+            const amounts = transactions.map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+            const total = amounts.reduce((acc, amount) => acc + amount, 0);
+            balanceTotal.textContent = 'Rp ' + formatCurrency(total);
+
+            const accountTotals = {
+                cash: 0,
+                bank: 0,
+                dana: 0,
+                shopee: 0,
+                gopay: 0
+            };
+
+            accounts.forEach(account => {
+                const filteredAmounts = transactions
+                    .filter(t => t.account === account)
+                    .map(transaction => transaction.amount * (transaction.type === 'income' ? 1 : -1));
+                accountTotals[account] = filteredAmounts.reduce((acc, amount) => acc + amount, 0);
+            });
+
+            balanceCash.textContent = 'Rp ' + formatCurrency(accountTotals.cash);
+            balanceBank.textContent = 'Rp ' + formatCurrency(accountTotals.bank);
+            balanceDana.textContent = 'Rp ' + formatCurrency(accountTotals.dana);
+            balanceShopee.textContent = 'Rp ' + formatCurrency(accountTotals.shopee);
+            balanceGoPay.textContent = 'Rp ' + formatCurrency(accountTotals.gopay);
+        }
+
+        function updateLocalStorage() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+        }
+
+        function init() {
+            transactionList.innerHTML = '';
+            transactions.forEach(addTransactionDOM);
+            updateBalances();
+            populateAccountSelect();
+        }
+
+        function populateAccountSelect() {
+            accountSelect.innerHTML = '';
+            accounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account;
+                option.textContent = account.charAt(0).toUpperCase() + account.slice(1);
+                accountSelect.appendChild(option);
+            });
+        }
+
+        addAccountBtn.addEventListener('click', () => {
+            const newAccount = prompt('Masukkan nama jalur transaksi baru:');
+            if (newAccount && !accounts.includes(newAccount)) {
+                accounts.push(newAccount);
+                updateLocalStorage();
+                populateAccountSelect();
+            }
+        });
+
+        init();
+
+        form.addEventListener('submit', addTransaction);
+    });
+</script>
 </body>
     </html>
