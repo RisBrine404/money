@@ -3,7 +3,6 @@
   <head>
     <title>Galery Memory ZRF</title>
     <style>
-      /* Menambah ukuran tabel dan gaya */
       .balance-table {
         width: 80%;
         border-collapse: collapse;
@@ -22,13 +21,11 @@
         font-weight: bold;
       }
 
-      /* Gaya khusus untuk baris Total */
       .balance-table tr:last-child td {
         font-weight: bold;
         background-color: #e8f4fa;
       }
 
-      /* Grafik */
       .chart-container {
         width: 80%;
         height: 350px;
@@ -58,7 +55,6 @@
         font-weight: bold;
       }
 
-      /* Garis dan Meteran */
       .chart-grid {
         position: absolute;
         width: 100%;
@@ -123,7 +119,6 @@
       </tbody>
     </table>
 
-    <!-- Grafik -->
     <div class="chart-container" id="chart-container">
       <div class="chart-grid" id="chart-grid"></div>
     </div>
@@ -151,23 +146,11 @@
         const chartContainer = document.getElementById("chart-container");
         const chartGrid = document.getElementById("chart-grid");
 
-        // Cari nominal tertinggi untuk menentukan skala
-        let maxNominal = 0;
-        const values = [];
-
-        rows.forEach((row, index) => {
-          if (index < rows.length - 1) { // Lewati baris terakhir (baris total)
-            const cellText = row.cells[1].textContent.replace("Rp ", "").replace(/\./g, "");
-            const nominal = parseInt(cellText, 10);
-            values.push({ label: row.cells[0].textContent, value: nominal });
-            if (nominal > maxNominal) {
-              maxNominal = nominal;
-            }
-          }
-        });
+        const numLines = 5; // Jumlah garis grid
+        const maxNominal = 4000000; // Atur nilai maksimum yang sesuai dengan jumlah garis
+        const barHeightUnit = 300 / numLines; // Tinggi per unit bar
 
         // Tambahkan garis horizontal dan meteran
-        const numLines = 5; // Jumlah garis grid
         for (let i = 0; i <= numLines; i++) {
           const value = (maxNominal / numLines) * i;
           const position = (1 - i / numLines) * 100;
@@ -185,12 +168,17 @@
         }
 
         // Buat grafik
-        values.forEach((item) => {
-          const bar = document.createElement("div");
-          bar.className = "chart-bar";
-          bar.style.height = (item.value / maxNominal) * 300 + "px"; // Skala ketinggian batang
-          bar.innerHTML = `<span>Rp ${new Intl.NumberFormat('id-ID').format(item.value)}</span>${item.label}`;
-          chartContainer.appendChild(bar);
+        rows.forEach((row, index) => {
+          if (index < rows.length - 1) { // Lewati baris terakhir (baris total)
+            const cellText = row.cells[1].textContent.replace("Rp ", "").replace(/\./g, "");
+            const nominal = parseInt(cellText, 10);
+
+            const bar = document.createElement("div");
+            bar.className = "chart-bar";
+            bar.style.height = (nominal / maxNominal) * (numLines * barHeightUnit) + "px";
+            bar.innerHTML = `<span>Rp ${new Intl.NumberFormat('id-ID').format(nominal)}</span>${row.cells[0].textContent}`;
+            chartContainer.appendChild(bar);
+          }
         });
       }
 
