@@ -27,6 +27,31 @@
         font-weight: bold;
         background-color: #e8f4fa;
       }
+
+      /* Grafik */
+      .chart-container {
+        width: 80%;
+        margin: 40px auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+
+      .chart-bar {
+        width: 12%;
+        background-color: #4caf50;
+        text-align: center;
+        color: #fff;
+        margin: 0 5px;
+        border-radius: 5px 5px 0 0;
+      }
+
+      .chart-bar span {
+        display: block;
+        margin-top: -20px;
+        font-size: 14px;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -68,7 +93,9 @@
         </tr>
       </tbody>
     </table>
-    
+
+    <!-- Grafik -->
+    <div class="chart-container" id="chart-container"></div>
 
     <script>
       function calculateTotal() {
@@ -88,8 +115,38 @@
         document.getElementById("total").textContent = "Rp " + formattedTotal;
       }
 
-      // Hitung total saat halaman dimuat
+      function generateChart() {
+        const rows = document.querySelectorAll("#balance-table tbody tr");
+        const chartContainer = document.getElementById("chart-container");
+
+        // Cari nominal tertinggi untuk menentukan skala
+        let maxNominal = 0;
+        const values = [];
+
+        rows.forEach((row, index) => {
+          if (index < rows.length - 1) { // Lewati baris terakhir (baris total)
+            const cellText = row.cells[1].textContent.replace("Rp ", "").replace(/\./g, "");
+            const nominal = parseInt(cellText, 10);
+            values.push({ label: row.cells[0].textContent, value: nominal });
+            if (nominal > maxNominal) {
+              maxNominal = nominal;
+            }
+          }
+        });
+
+        // Buat grafik
+        values.forEach((item) => {
+          const bar = document.createElement("div");
+          bar.className = "chart-bar";
+          bar.style.height = (item.value / maxNominal) * 300 + "px"; // Skala ketinggian batang
+          bar.innerHTML = `<span>Rp ${new Intl.NumberFormat('id-ID').format(item.value)}</span>${item.label}`;
+          chartContainer.appendChild(bar);
+        });
+      }
+
+      // Hitung total dan buat grafik saat halaman dimuat
       calculateTotal();
+      generateChart();
     </script>
   </body>
-    </html>
+</html>
