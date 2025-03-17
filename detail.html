@@ -80,16 +80,14 @@
         color: #666;
       }
       .slider-container { max-width: 600px; margin: 20px auto; overflow: hidden; position: relative; border: 2px solid #ddd; border-radius: 10px; }
-        .slider { display: flex; transition: transform 0.5s ease; animation: slide 9s infinite; }
+        .slider { display: flex; transition: transform 0.5s ease; }
         .slide { min-width: 100%; display: flex; flex-direction: column; align-items: center; }
         .slide img { width: 100%; border-bottom: 2px solid #ddd; }
         .title { padding: 10px; background: #f0f0f0; text-align: center; width: 100%; }
-
-        @keyframes slide {
-            0%, 100% { transform: translateX(0); }
-            33.33% { transform: translateX(-100%); }
-            66.66% { transform: translateX(-200%); }
-        }
+        .buttons { display: flex; justify-content: space-between; margin: 10px 0; }
+        .buttons button { padding: 10px 20px; cursor: pointer; }
+        #slider { transform: translateX(0); }
+        #slider:target ~ .slider { transform: translateX(var(--offset, 0)); }
     </style>
   </head>
   <body>
@@ -212,40 +210,51 @@
       generateChart();
     </script>
     <div class="slider-container">
-        <div class="slider">
-            <div class="slide">
+        <div id="slider" class="slider">
+            <div class="slide" id="slide1">
                 <img src="IMG20240730080645.jpg" alt="Photo 1">
                 <div class="title">JULI 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide2">
                 <img src="IMG20240901061409.jpg" alt="Photo 2">
                 <div class="title">AGUSTUS 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide3">
                 <img src="IMG20241001191309.jpg" alt="Photo 3">
                 <div class="title">SEPTEMBER 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide4">
                 <img src="IMG20241031045608.jpg" alt="Photo 4">
                 <div class="title">OKTOBER 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide5">
                 <img src="IMG20241201085530.jpg" alt="Photo 5">
                 <div class="title">NOVEMBER 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide6">
                 <img src="IMG20241230050422.jpg" alt="Photo 6">
                 <div class="title">DESEMBER 2024</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide7">
                 <img src="IMG20250130060823.jpg" alt="Photo 7">
                 <div class="title">JANUARI 2025</div>
             </div>
-            <div class="slide">
+            <div class="slide" id="slide8">
                 <img src="IMG20250302233122.jpg" alt="Photo 8">
                 <div class="title">FEBRUARI 2025</div>
             </div>
         </div>
+    </div>
+    <div class="buttons">
+        <a href="#slide1"><button>1</button></a>
+        <a href="#slide2"><button>2</button></a>
+        <a href="#slide3"><button>3</button></a>
+        <a href="#slide4"><button>4</button></a>
+        <a href="#slide5"><button>5</button></a>
+        <a href="#slide6"><button>6</button></a>
+        <a href="#slide7"><button>7</button></a>
+        <a href="#slide8"><button>8</button></a>
+        <a href="#slide9"><button>9</button></a>
     </div>
   </body>
 </html>
