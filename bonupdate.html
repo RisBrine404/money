@@ -298,19 +298,42 @@
       { nama: "Warung 2", jumlah: 30000 }
     ];
 
-    function renderTabelData(idBody, idTotal, data, label) {
-      const tbody = document.getElementById(idBody).querySelector("tbody");
-      const totalElemen = document.getElementById(idTotal);
-      let total = 0;
-      tbody.innerHTML = data.map(row => {
-        total += row.jumlah;
-        return `<tr><td>${row.nama}</td><td>Rp ${row.jumlah.toLocaleString()}</td></tr>`;
-      }).join('');
-      totalElemen.innerText = `Total ${label}: Rp ${total.toLocaleString()}`;
-    }
+    function renderTabelData(idTable, idTotal, data, label) {
+  const table = document.getElementById(idTable);
+  const tbody = table.querySelector("tbody");
+  const thead = table.querySelector("thead tr");
+  const totalElemen = document.getElementById(idTotal);
+
+  // Cek apakah data memiliki properti 'catatan'
+  const hasCatatan = data.some(row => 'catatan' in row);
+
+  // Ubah header tabel
+  thead.innerHTML = `
+    <th>Nama</th>
+    <th>Jumlah</th>
+    ${hasCatatan ? "<th>Catatan</th>" : ""}
+  `;
+
+  // Isi tabel
+  let total = 0;
+  tbody.innerHTML = data.map(row => {
+    total += row.jumlah;
+    return `
+      <tr>
+        <td>${row.nama}</td>
+        <td>Rp ${row.jumlah.toLocaleString()}</td>
+        ${hasCatatan ? `<td>${row.catatan || '-'}</td>` : ""}
+      </tr>
+    `;
+  }).join('');
+
+  totalElemen.innerText = `Total ${label}: Rp ${total.toLocaleString()}`;
+}
+
 
     renderTabelData("tabelHutangSaya", "totalHutangSaya", hutangSaya, "hutang ke saya");
-    renderTabelData("tabelBelumTerbayar", "totalBelumTerbayar", belumTerbayar, "hutang belum terbayarkan");
+renderTabelData("tabelBelumTerbayar", "totalBelumTerbayar", belumTerbayar, "hutang belum terbayarkan");
+
   </script>
 </body>
 </html>
