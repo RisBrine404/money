@@ -151,43 +151,37 @@
   </div>
 
   <!-- Tambahan Tabel -->
-  <div class="table-section">
-    <div class="table-container">
-    <!-- Tabel Hutang ke Saya -->
-    <div>
-      <div class="judul">Hutang ke Saya</div>
-      <table id="tabelHutangSaya">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Jumlah</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr><td colspan="2" class="total-row" id="totalHutangSaya"></td></tr>
-        </tfoot>
-      </table>
-    </div>
+  <h2>Hutang ke Saya</h2>
+  <table id="tabelHutangSaya">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Jumlah</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" id="totalHutangSaya"></td>
+      </tr>
+    </tfoot>
+  </table>
 
-    <!-- Tabel Hutang Belum Terbayar -->
-    <div>
-      <div class="judul">Hutang Belum Terbayarkan</div>
-      <table id="tabelBelumTerbayar">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Jumlah</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr><td colspan="2" class="total-row" id="totalBelumTerbayar"></td></tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-  </div>
+  <h2>Hutang Belum Terbayar</h2>
+  <table id="tabelBelumTerbayar">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Jumlah</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" id="totalBelumTerbayar"></td>
+      </tr>
+    </tfoot>
+  </table>
 
   <script>
     function hitungAkumulasiHutang(data) {
@@ -294,27 +288,25 @@
       { nama: "Alfin", jumlah: 10000 },
       { nama: "Alif", jumlah: 100000 }
     ];
+
     const belumTerbayar = [
       { nama: "Warung ko Alif", jumlah: 157000 },
       { nama: "Warung 2", jumlah: 30000 }
     ];
 
-    function renderTabelData(idBody, idTotal, data) {
-      const tbody = document.getElementById(idBody);
+    function renderTabelData(idBody, idTotal, data, label) {
+      const tbody = document.getElementById(idBody).querySelector("tbody");
       const totalElemen = document.getElementById(idTotal);
       let total = 0;
       tbody.innerHTML = data.map(row => {
         total += row.jumlah;
         return `<tr><td>${row.nama}</td><td>Rp ${row.jumlah.toLocaleString()}</td></tr>`;
       }).join('');
-      totalElemen.innerText = `Total: Rp ${total.toLocaleString()}`;
+      totalElemen.innerText = `Total ${label}: Rp ${total.toLocaleString()}`;
     }
 
-    renderTabelData("tabelHutangSaya").body = "tabelHutangSaya".querySelector("tbody");
-    renderTabelData("tabelBelumTerbayar").body = "tabelBelumTerbayar".querySelector("tbody");
-
-    renderTabelData("tabelHutangSaya".querySelector("tbody").id, "totalHutangSaya", hutangSaya);
-    renderTabelData("tabelBelumTerbayar".querySelector("tbody").id, "totalBelumTerbayar", belumTerbayar);
+    renderTabelData("tabelHutangSaya", "totalHutangSaya", hutangSaya, "hutang ke saya");
+    renderTabelData("tabelBelumTerbayar", "totalBelumTerbayar", belumTerbayar, "hutang belum terbayarkan");
   </script>
 </body>
 </html>
