@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bon Transaksi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .hutang {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+        }
+        .nama {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+            flex-direction: column;
+        }
+        .item:last-child {
+            border-bottom: none;
+        }
+        .judul-transaksi {
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+        .status {
+            font-weight: bold;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+        .loading {
+            background-color: #dc3545;
+        }
+        .finis {
+            background-color: #28a745;
+        }
+        .total {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+        .jatuh-tempo {
+            font-size: 14px;
+            color: black;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #ff000f,
+                         0 0 15px #ff000f,
+                         0 0 20px #ff000f,
+                         0 0 25px #ff000f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bon Transaksi</h1>
+        <div id="hasil"></div>
+    </div>
+
+    <script>
+        function hitungAkumulasiHutang(data) {
+            return data.map(person => {
+                const items = person.transaksi;
+                const total = items
+                    .filter(item => item.status === true)
+                    .reduce((sum, item) => sum + (item.nilai || 0), 0);
+                return { nama: person.nama, items, totalHutang: total };
+            });
+        }
+
+        function formatTanggal(tanggal) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(tanggal).toLocaleDateString('id-ID', options);
+        }
+
+        function hitungTimer(jatuhTempo) {
+            const sekarang = new Date();
+            const jatuhTempoDate = new Date(jatuhTempo);
+            const selisih = jatuhTempoDate - sekarang;
+            const hariTersisa = Math.ceil(selisih / (1000 * 60 * 60 * 24));
+            return hariTersisa > 0 ? `${hariTersisa} hari tersisa` : "Jatuh tempo";
+        }
+
+        const daftarHutang = [
+            {
+                nama: "Orang Pertama",
+                transaksi: [
+                    { tipe: "judul", teks: "Kredivo Transaksi" },
+                    { nama: "PTunai 1", nilai: 614890, status: false, jatuhTempo: "2025-02-28" },
+                    { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-13" },
+                    { nama: "PLN Prepraid token", nilai: 57760, status: false, jatuhTempo: "2025-03-17" },
+                    { nama: "PTunai 2", nilai: 614890, status: false, jatuhTempo: "2025-03-31" },
+                    { nama: "PTunai 3", nilai: 614890, status: true, jatuhTempo: "2025-04-30" },
+                    { nama: "PTunai 4", nilai: 614890, status: true, jatuhTempo: "2025-05-31" },
+                    { nama: "PTunai 5", nilai: 614890, status: true, jatuhTempo: "2025-06-30" },
+                    { nama: "PTunai 6", nilai: 614890, status: true, jatuhTempo: "2025-07-31" }
+                ]
+            },
+            {
+                nama: "Orang Kedua",
+                transaksi: [
+                    { tipe: "judul", teks: "Kredivo Transaksi" },
+                    { nama: "PaketData20Gb", nilai: 75000, status: false, jatuhTempo: "2025-03-12" },
+                    { nama: "ShopePay", nilai: 420410, status: false, jatuhTempo: "2025-03-15" },
+                    { nama: "GoPay", nilai: 61050, status: false, jatuhTempo: "2025-03-15" },
+                    { nama: "Shopee", nilai: 262230, status: false, jatuhTempo: "2025-03-21" },
+                    { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-23" },
+                    { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-08" },
+                    { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-08" },
+                    { nama: "Dana", nilai: 163690, status: false, jatuhTempo: "2025-05-09" },
+                    { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-11" },
+                    { nama: "PaketData20Gb", nilai: 73430, status: false, jatuhTempo: "2025-05-13" },
+                    { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-13" },
+                    { nama: "Dana", nilai: 32900, status: false, jatuhTempo: "2025-05-16" },
+                    { nama: "Dana", nilai: 272690, status: false, jatuhTempo: "2025-05-18" },
+                    { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-22" },
+                    { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-27" },
+                    { nama: "PaketData20Gb", nilai: 81350, status: false, jatuhTempo: "2025-06-03" },
+                    { nama: "Dana", nilai: 839500, status: true, jatuhTempo: "2025-06-12" },
+                    { nama: "Freedom U 10GB 30 Hari", nilai: 62500, status: true, jatuhTempo: "2025-06-22" },
+                    { nama: "Bantu teman data Telkomsel fit KD", nilai: 24950, status: true, jatuhTempo: "2025-07-01" },
+                    { nama: "GOPAY 90 RB", nilai: 99100, status: true, jatuhTempo: "2025-07-05" },
+                    { tipe: "judul", teks: "EasyCash Transaksi" },
+                    { nama: "PTunai1", nilai: 283983, status: true, jatuhTempo: "2025-07-12" },
+                    { nama: "PTunai2", nilai: 283983, status: true, jatuhTempo: "2025-08-12" },
+                    { nama: "PTunai3", nilai: 283983, status: true, jatuhTempo: "2025-09-12" },
+                    { nama: "PTunai4", nilai: 283983, status: true, jatuhTempo: "2025-10-12" }
+                ]
+            }
+        ];
+
+        const hasil = hitungAkumulasiHutang(daftarHutang);
+        document.getElementById("hasil").innerHTML = hasil.map(p => `
+            <div class="hutang">
+                <div class="nama">${p.nama}</div>
+                ${p.items.map(item => {
+                    if (item.tipe === "judul") {
+                        return `<div class="judul-transaksi">${item.teks}</div>`;
+                    } else {
+                        return `
+                            <div class="item">
+                                <div class="jatuh-tempo">Jatuh Tempo: ${formatTanggal(item.jatuhTempo)} (${hitungTimer(item.jatuhTempo)})</div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>${item.nama}</span>
+                                    <span>Rp ${item.nilai.toLocaleString()}</span>
+                                    <span class="status ${item.status ? 'loading' : 'finis'}">${item.status ? 'Loading' : 'Finis'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('')}
+                <div class="total">Total yang dieksekusi: Rp ${p.totalHutang.toLocaleString()}</div>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>
