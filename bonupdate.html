@@ -153,44 +153,40 @@
   <!-- Tambahan Tabel -->
   <div class="table-section">
     <div class="table-container">
-      <!-- Tabel Hutang ke Saya -->
-      <div>
-        <div class="table-title">Hutang ke Saya</div>
-        <table id="tabelHutangSaya">
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Hutang ke Saya</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2" class="total-table" id="totalHutangSaya"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Tabel Hutang Belum Terbayarkan -->
-      <div>
-        <div class="table-title">Hutang Belum Terbayarkan</div>
-        <table id="tabelBelumTerbayar">
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Hutang Belum Terbayarkan</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2" class="total-table" id="totalBelumTerbayar"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+    <!-- Tabel Hutang ke Saya -->
+    <div>
+      <div class="judul">Hutang ke Saya</div>
+      <table id="tabelHutangSaya">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Jumlah</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr><td colspan="2" class="total-row" id="totalHutangSaya"></td></tr>
+        </tfoot>
+      </table>
     </div>
+
+    <!-- Tabel Hutang Belum Terbayar -->
+    <div>
+      <div class="judul">Hutang Belum Terbayarkan</div>
+      <table id="tabelBelumTerbayar">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Jumlah</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr><td colspan="2" class="total-row" id="totalBelumTerbayar"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
   </div>
 
   <script>
@@ -225,8 +221,8 @@
                     { nama: "PTunai 1", nilai: 614890, status: false, jatuhTempo: "2025-02-28" },
                     { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-13" },
                     { nama: "PLN Prepraid token", nilai: 57760, status: false, jatuhTempo: "2025-03-17" },
-                    { nama: "PTunai 2", nilai: 614890, status: false, jatuhTempo: "2025-03-31" },
-                    { nama: "PTunai 3", nilai: 614890, status: true, jatuhTempo: "2025-04-30" },
+                    { nama: "PTunai 2", nilai: 614890, status: true, jatuhTempo: "2025-03-31" },
+                    { nama: "PTunai 3", nilai: 614890, status: false, jatuhTempo: "2025-04-30" },
                     { nama: "PTunai 4", nilai: 614890, status: true, jatuhTempo: "2025-05-31" },
                     { nama: "PTunai 5", nilai: 614890, status: true, jatuhTempo: "2025-06-30" },
                     { nama: "PTunai 6", nilai: 614890, status: true, jatuhTempo: "2025-07-31" }
@@ -291,12 +287,16 @@
 
     // Tabel Hutang ke Saya & Belum Terbayarkan
     const hutangSaya = [
-      { nama: "Andi", jumlah: 500000 },
-      { nama: "Budi", jumlah: 250000 }
+      { nama: "Hamdani", jumlah: 510000 },
+      { nama: "Tri", jumlah: 25000 },
+      { nama: "Bagus", jumlah: 150000 },
+      { nama: "Sika", jumlah: 50000 },
+      { nama: "Alfin", jumlah: 10000 },
+      { nama: "Alif", jumlah: 100000 }
     ];
     const belumTerbayar = [
-      { nama: "Citra", jumlah: 1000000 },
-      { nama: "Dodi", jumlah: 750000 }
+      { nama: "Warung ko Alif", jumlah: 157000 },
+      { nama: "Warung 2", jumlah: 30000 }
     ];
 
     function renderTabelData(idBody, idTotal, data) {
