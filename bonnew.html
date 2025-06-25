@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bon Transaksi & Tabel Hutang</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .hutang {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #fff;
+    }
+
+    .nama {
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+      flex-direction: column;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .judul-transaksi {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .status {
+      font-weight: bold;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    .loading {
+      background-color: #dc3545; /* merah */
+    }
+
+    .finis {
+      background-color: #28a745; /* hijau */
+    }
+
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
+    .jatuh-tempo {
+      font-size: 14px;
+      color: black;
+      margin-bottom: 5px;
+      text-shadow: 0 0 5px #ff000f,
+                   0 0 15px #ff000f,
+                   0 0 20px #ff000f,
+                   0 0 25px #ff000f;
+    }
+
+    .table-section {
+      margin-top: 40px;
+    }
+
+    .table-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    table {
+      width: 100%;
+      max-width: 500px;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    @media (max-width: 768px) {
+      .table-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .table-title {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .total-table {
+      font-weight: bold;
+      text-align: right;
+      padding: 10px 16px;
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bon Transaksi</h1>
+    <div id="hasil"></div>
+  </div>
+
+  <h2>Hutang ke Saya</h2>
+  <table id="tabelHutangSaya">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Jumlah</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" id="totalHutangSaya"></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <h2>Hutang Belum Terbayar</h2>
+  <table id="tabelBelumTerbayar">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Jumlah</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" id="totalBelumTerbayar"></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <script>
+    function hitungAkumulasiHutang(data) {
+      return data.map(person => {
+        const items = person.transaksi;
+        const total = items
+          .filter(item => item.status === true)
+          .reduce((sum, item) => sum + (item.nilai || 0), 0);
+        return { nama: person.nama, items, totalHutang: total };
+      });
+    }
+
+    function formatTanggal(tanggal) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(tanggal).toLocaleDateString('id-ID', options);
+    }
+
+    function hitungTimer(jatuhTempo) {
+      const sekarang = new Date();
+      const jatuhTempoDate = new Date(jatuhTempo);
+      const selisih = jatuhTempoDate - sekarang;
+      const hariTersisa = Math.ceil(selisih / (1000 * 60 * 60 * 24));
+      return hariTersisa > 0 ? `${hariTersisa} hari tersisa` : "Jatuh tempo";
+    }
+
+    const daftarHutang = [/* data asli kamu, tidak saya ulang untuk singkat */];
+
+    const hasil = hitungAkumulasiHutang(daftarHutang);
+    document.getElementById("hasil").innerHTML = hasil.map(p => `
+      <div class="hutang">
+        <div class="nama">${p.nama}</div>
+        ${p.items.map(item => {
+          if (item.tipe === "judul") {
+            return `<div class="judul-transaksi">${item.teks}</div>`;
+          } else {
+            return `
+              <div class="item">
+                <div class="jatuh-tempo">Jatuh Tempo: ${formatTanggal(item.jatuhTempo)} (${hitungTimer(item.jatuhTempo)})</div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>${item.nama}</span>
+                  <span>Rp ${item.nilai.toLocaleString()}</span>
+                  <span class="status ${item.status ? 'finis' : 'loading'}">${item.status ? 'Finis' : 'Loading'}</span>
+                </div>
+              </div>
+            `;
+          }
+        }).join('')}
+        <div class="total">Total yang dieksekusi: Rp ${p.totalHutang.toLocaleString()}</div>
+      </div>
+    `).join('');
+
+    const hutangSaya = [
+      { nama: "Hamdani", jumlah: 510000 },
+      { nama: "Tri", jumlah: 25000 },
+      { nama: "Bagus", jumlah: 150000 },
+      { nama: "Sika", jumlah: 50000 },
+      { nama: "Alfin", jumlah: 10000 },
+      { nama: "Alif", jumlah: 100000 },
+      { nama: "Mala", jumlah: 650000 },
+      { nama: "Fredy", jumlah: 500000 }
+    ];
+
+    const belumTerbayar = [
+      { nama: "Warung ko Alif", jumlah: 157000 },
+      { nama: "Warung 2", jumlah: 30000 }
+    ];
+
+    function renderTabelData(idBody, idTotal, data, label) {
+      const tbody = document.getElementById(idBody).querySelector("tbody");
+      const totalElemen = document.getElementById(idTotal);
+      let total = 0;
+      tbody.innerHTML = data.map(row => {
+        total += row.jumlah;
+        return `<tr><td>${row.nama}</td><td>Rp ${row.jumlah.toLocaleString()}</td></tr>`;
+      }).join('');
+      totalElemen.innerText = `Total ${label}: Rp ${total.toLocaleString()}`;
+    }
+
+    renderTabelData("tabelHutangSaya", "totalHutangSaya", hutangSaya, "hutang ke saya");
+    renderTabelData("tabelBelumTerbayar", "totalBelumTerbayar", belumTerbayar, "hutang belum terbayarkan");
+  </script>
+</body>
+</html>
