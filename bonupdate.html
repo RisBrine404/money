@@ -300,7 +300,7 @@
 
     // Tabel Hutang ke Saya & Belum Terbayarkan
     const hutangSaya = [
-      { nama: "Hamdani", jumlah: 400000, catatan: "1.410.000" },
+      { nama: "Hamdani", jumlah: 0, catatan: "1.410.000" },
       { nama: "Tri", jumlah: 0, catatan: "25.000" },
       { nama: "Bagus", jumlah: 150000, catatan: "250.000" },
       { nama: "Sika", jumlah: 0, catatan: "50.000" },
@@ -312,8 +312,9 @@
     ];
 
     const belumTerbayar = [
-      { nama: "Warung ko Alif", jumlah: 177000 },
-      { nama: "Warung 2", jumlah: 35000 }
+      { nama: "Warung ko Alif", jumlah: 135000 },
+      { nama: "Warung 2", jumlah: 0 },
+      { name: "AndreWinata", jumlah: 40000 }
     ];
 
     function renderTabelData(idTable, idTotal, data, label) {
