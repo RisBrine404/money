@@ -273,7 +273,7 @@
                     { nama: "PTunai3", nilai: 298283, status: false, jatuhTempo: "2025-09-12" },
                     { nama: "PT2-2", nilai: 130584, status: false, jatuhTempo: "2025-09-22" },
                     { nama: "PTunai4", nilai: 283983, status: false, jatuhTempo: "2025-10-12" },
-                    { nama: "PT2-3", nilai: 130167, status: true, jatuhTempo: "2025-10-22" },
+                    { nama: "PT2-3", nilai: 130167, status: false, jatuhTempo: "2025-10-22" },
                     { nama: "PTunai5", nilai: 283983, status: true, jatuhTempo: "2025-11-12" },
                     { nama: "PT2-4", nilai: 129333, status: true, jatuhTempo: "2025-11-22" },
                     { nama: "PTunai6", nilai: 283983, status: true, jatuhTempo: "2025-12-12" },
@@ -314,7 +314,7 @@
 
     // Tabel Hutang ke Saya & Belum Terbayarkan
     const hutangSaya = [
-      { nama: "Hamdani", jumlah: 0, catatan: "1.410.000" },
+      { nama: "Hamdani", jumlah: 300000, catatan: "1.710.000" },
       { nama: "Tri", jumlah: 0, catatan: "25.000" },
       { nama: "Bagus", jumlah: 150000, catatan: "250.000" },
       { nama: "Sika", jumlah: 0, catatan: "50.000" },
@@ -322,13 +322,14 @@
       { nama: "Alif", jumlah: 150000, catatan: "400.000" },
       { nama: "Mala", jumlah: 650000, catatan: "750.000" },
       { nama: "Agus", jumlah: 150000, catatan: "150.000" },
+      { nama: "MPras", jumlah: 300000, catatan: "1.250.000" },
       { nama: "Fredy", jumlah: 500000, catatan: "1.000.000" }
     ];
 
     const belumTerbayar = [
-      { nama: "Warung ko Alif", jumlah: 204000 },
+      { nama: "Warung ko Alif", jumlah: 0 },
       { nama: "Warung 2", jumlah: 0 },
-      { nama: "AndreWinata", jumlah: 57000 }
+      { nama: "AndreWinata", jumlah: 32000 }
     ];
 
     function renderTabelData(idTable, idTotal, data, label) {
