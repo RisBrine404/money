@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bon Transaksi & Tabel Hutang AS4BT2VLVS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .hutang {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #fff;
+    }
+
+    .nama {
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+      flex-direction: column;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .judul-transaksi {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .status {
+      font-weight: bold;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    .loading {
+      background-color: #dc3545;
+    }
+
+    .finis {
+      background-color: #28a745;
+    }
+
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    .total-terbayar {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 5px;
+      font-size: 18px;
+      color: #28a745; /* Warna hijau untuk yang terbayarkan */
+    }
+
+    .jatuh-tempo {
+      font-size: 14px;
+      color: black;
+      margin-bottom: 5px;
+      text-shadow: 0 0 5px #ff000f,
+                   0 0 15px #ff000f,
+                   0 0 20px #ff000f,
+                   0 0 25px #ff000f;
+    }
+
+    .table-section {
+      margin-top: 40px;
+    }
+
+    table {
+      width: 100%;
+      max-width: 700px;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    h2 {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bon Transaksi</h1>
+    <div id="hasil"></div>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <h2>Hutang ke Saya</h2>
+    <table id="tabelHutangSaya">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Jumlah</th>
+          <th>Catatan Pernah Pinjam</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" id="totalHutangSaya" style="font-weight:bold; text-align:right;"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <h2>Hutang Belum Terbayar</h2>
+    <table id="tabelBelumTerbayar">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Jumlah</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" id="totalBelumTerbayar" style="font-weight:bold; text-align:right;"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <script>
+    function hitungAkumulasiHutang(data) {
+      return data.map(person => {
+        const items = person.transaksi;
+        
+        // Menghitung total untuk status: false (Finis)
+        const totalEksekusi = items
+          .filter(item => item.status === false && item.nilai)
+          .reduce((sum, item) => sum + item.nilai, 0);
+        
+        // Menghitung total untuk status: true (Loading) -> Hutang yang terbayarkan
+        const totalTerbayar = items
+          .filter(item => item.status === true && item.nilai)
+          .reduce((sum, item) => sum + item.nilai, 0);
+
+        return { 
+          nama: person.nama, 
+          items, 
+          totalEksekusi, 
+          totalTerbayar 
+        };
+      });
+    }
+
+    function formatTanggal(tanggal) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(tanggal).toLocaleDateString('id-ID', options);
+    }
+
+    function hitungTimer(jatuhTempo) {
+      const sekarang = new Date();
+      const jatuhTempoDate = new Date(jatuhTempo);
+      const selisih = jatuhTempoDate - sekarang;
+      const hariTersisa = Math.ceil(selisih / (1000 * 60 * 60 * 24));
+      return hariTersisa > 0 ? `${hariTersisa} hari tersisa` : "Jatuh tempo";
+    }
+
+    const daftarHutang = [
+      {
+        nama: "Orang Pertama(Numpang Hutang='Hery Kosasih')",
+        transaksi: [
+            { tipe: "judul", teks: "Kredivo Transaksi" },
+            { nama: "PTunai 1", nilai: 614890, status: false, jatuhTempo: "2025-02-28" },
+            { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-13" },
+            { nama: "PLN Prepraid token", nilai: 57760, status: false, jatuhTempo: "2025-03-17" },
+            { nama: "PTunai 2", nilai: 614890, status: true, jatuhTempo: "2025-03-31" },
+            { nama: "PTunai 3", nilai: 614890, status: false, jatuhTempo: "2025-04-30" },
+            { nama: "PTunai 4", nilai: 614890, status: true, jatuhTempo: "2025-05-31" },
+            { nama: "PTunai 5", nilai: 618360, status: true, jatuhTempo: "2025-06-30" },
+            { nama: "PTunai 6", nilai: 614890, status: true, jatuhTempo: "2025-07-31" }
+        ]
+      },
+      {
+        nama: "Orang Kedua(Pemilik Hutang)",
+        transaksi: [
+            { tipe: "judul", teks: "Kredivo Transaksi" },
+            { nama: "PaketData20Gb", nilai: 75000, status: false, jatuhTempo: "2025-03-12" },
+            { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-13" },
+            { nama: "ShopePay", nilai: 420410, status: false, jatuhTempo: "2025-03-15" },
+            { nama: "GoPay", nilai: 61050, status: false, jatuhTempo: "2025-03-15" },
+            { nama: "Shopee", nilai: 262230, status: false, jatuhTempo: "2025-03-21" },
+            { nama: "PaketData10Gb", nilai: 50500, status: false, jatuhTempo: "2025-03-23" },
+            { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-08" },
+            { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-08" },
+            { nama: "Dana", nilai: 163690, status: false, jatuhTempo: "2025-05-09" },
+            { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-11" },
+            { nama: "PaketData20Gb", nilai: 73430, status: false, jatuhTempo: "2025-05-13" },
+            { nama: "Dana", nilai: 109190, status: false, jatuhTempo: "2025-05-13" },
+            { nama: "Dana", nilai: 32900, status: false, jatuhTempo: "2025-05-16" },
+            { nama: "Dana", nilai: 272690, status: false, jatuhTempo: "2025-05-18" },
+            { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-22" },
+            { nama: "PaketData5,5Gb", nilai: 34900, status: false, jatuhTempo: "2025-05-27" },
+            { nama: "PaketData20Gb", nilai: 81350, status: false, jatuhTempo: "2025-06-03" },
+            { nama: "Dana", nilai: 839500, status: false, jatuhTempo: "2025-06-12" },
+            { nama: "Freedom U 10GB 30 Hari", nilai: 68750, status: false, jatuhTempo: "2025-06-22" },
+            { nama: "Bantu teman data Telkomsel fit KD", nilai: 27450, status: false, jatuhTempo: "2025-07-01" },
+            { nama: "GOPAY 90 RB", nilai: 99100, status: false, jatuhTempo: "2025-07-05" },
+            { nama: "PaketData 10GB 30D", nilai: 51850, status: false, jatuhTempo: "2025-07-25" },
+            { nama: "GoPay 150 RB", nilai: 164500, status: false, jatuhTempo: "2025-08-08" },
+            { nama: "Pulsa Indosat", nilai: 7100, status: false, jatuhTempo: "2025-08-11" },
+            { nama: "PaketData 10GB 30D", nilai: 51850, status: false, jatuhTempo: "2025-08-20" },
+            { nama: "PaketData 10GB 30D", nilai: 51850, status: false, jatuhTempo: "2025-09-20" },
+            { nama: "PaketData 10GB 30D", nilai: 51850, status: false, jatuhTempo: "2025-09-20" },
+            { nama: "Dana", nilai: 412171, status: false, jatuhTempo: "2025-09-12" },
+            { nama: "PaketData 10GB 30D", nilai: 51850, status: false, jatuhTempo: "2025-09-20" },
+            { nama: "GoPay 50 RB", nilai: 69678, status: false, jatuhTempo: "2025-09-08" },
+            { nama: "PaketData 20GB 30D", nilai: 100611, status: false, jatuhTempo: "2025-09-20" },
+            { nama: "Pinjaman Tenor1", nilai: 149014, status: false, jatuhTempo: "2025-09-10" },
+            { nama: "Pinjaman Tenor2", nilai: 124054, status: false, jatuhTempo: "2025-10-10" },
+            { nama: "Pinjaman Tenor3", nilai: 102214, status: false, jatuhTempo: "2025-11-10" },
+            { nama: "Pinjaman Tenor4", nilai: 102180, status: false, jatuhTempo: "2025-12-10" },
+            { nama: "Pinjaman Tenor5", nilai: 102220, status: false, jatuhTempo: "2026-01-10" },
+            { nama: "Pinjaman Tenor6", nilai: 102220, status: false, jatuhTempo: "2026-02-10" },
+            { nama: "Indosat 40K", nilai: 40290, status: false, jatuhTempo: "2025-12-28" },
+            { nama: "Freedom Internet 14GB/28Day", nilai: 49950, status: false, jatuhTempo: "2025-12-30" },
+            { nama: "Internet OMG 55K", nilai: 54800, status: false, jatuhTempo: "2025-01-20" },
+            { nama: "Freedom Internet 5GB/2Day", nilai: 10900, status: false, jatuhTempo: "2025-01-23" },
+            { nama: "Dana 1JT", nilai: 1090100, status: false, jatuhTempo: "2026-02-17" },
+            { nama: "Dana 70k", nilai: 70950, status: false, jatuhTempo: "2026-02-17"},
+            
+            { tipe: "judul", teks: "EasyCash Transaksi" },
+            { nama: "PTunai1", nilai: 285083, status: false, jatuhTempo: "2025-07-12" },
+            { nama: "PTunai2", nilai: 285083, status: false, jatuhTempo: "2025-08-12" },
+            { nama: "PT2-1", nilai: 119250, status: false, jatuhTempo: "2025-08-22" },
+            { nama: "PTunai3", nilai: 298283, status: false, jatuhTempo: "2025-09-12" },
+            { nama: "PT2-2", nilai: 130584, status: false, jatuhTempo: "2025-09-22" },
+            { nama: "PTunai4", nilai: 283983, status: false, jatuhTempo: "2025-10-12" },
+            { nama: "PT2-3", nilai: 130167, status: false, jatuhTempo: "2025-10-22" },
+            { nama: "PTunai5", nilai: 298283, status: false, jatuhTempo: "2025-11-12" },
+            { nama: "PT2-4", nilai: 130584, status: false, jatuhTempo: "2025-11-22" },
+            { nama: "PTunai6", nilai: 283985, status: false, jatuhTempo: "2025-12-12" },
+            { nama: "PT2-5", nilai: 129333, status: false, jatuhTempo: "2025-12-22" },
+            { nama: "PT2-6", nilai: 129335, status: false, jatuhTempo: "2026-01-22" },
+            { nama: "PT3-1", nilai: 51940, status: false, jatuhTempo: "2026-01-12" },
+            { nama: "PT3-2", nilai: 51000, status: false, jatuhTempo: "2026-01-27" },
+            { nama: "PT3-3", nilai: 51000, status: false, jatuhTempo: "2026-02-11" },
+            { nama: "PT3-4", nilai: 51000, status: true, jatuhTempo: "2026-02-26" },
+            { nama: "PT3-5", nilai: 51000, status: true, jatuhTempo: "2026-03-13" },
+            { nama: "PT3-6", nilai: 51000, status: true, jatuhTempo: "2026-03-28" },
+            { nama: "PT3-7", nilai: 51000, status: true, jatuhTempo: "2026-04-12" },
+            { nama: "PT3-8", nilai: 51000, status: true, jatuhTempo: "2026-04-27" },
+          
+            { tipe: "judul", teks: "FinPlus Transaksi" },
+            { nama: "PTunai1", nilai: 930000, status: false, jatuhTempo: "2025-07-27" },
+            { nama: "PTunai2", nilai: 243816, status: false, jatuhTempo: "2025-08-31" },
+            { nama: "PTunai3", nilai: 200266, status: false, jatuhTempo: "2025-10-20" }
+        ]
+      }
+    ];
+
+    const hasilData = hitungAkumulasiHutang(daftarHutang);
+    
+    document.getElementById("hasil").innerHTML = hasilData.map(p => `
+      <div class="hutang">
+        <div class="nama">${p.nama}</div>
+        ${p.items.map(item => {
+          if (item.tipe === "judul") {
+            return `<div class="judul-transaksi">${item.teks}</div>`;
+          } else {
+            return `
+              <div class="item">
+                <div class="jatuh-tempo">Jatuh Tempo: ${formatTanggal(item.jatuhTempo)} (${hitungTimer(item.jatuhTempo)})</div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>${item.nama}</span>
+                  <span>Rp ${item.nilai.toLocaleString()}</span>
+                  <span class="status ${item.status ? 'loading' : 'finis'}">${item.status ? 'Loading' : 'Finis'}</span>
+                </div>
+              </div>
+            `;
+          }
+        }).join('')}
+        <div class="total">Total yang dieksekusi: Rp ${p.totalEksekusi.toLocaleString()}</div>
+        <div class="total-terbayar">Hutang yang terbayarkan: Rp ${p.totalTerbayar.toLocaleString()}</div>
+      </div>
+    `).join('');
+
+    // Tabel Hutang ke Saya & Belum Terbayarkan
+    const hutangSaya = [
+      { nama: "Hamdani", jumlah: 0, catatan: "1.710.000" },
+      { nama: "Tri", jumlah: 0, catatan: "25.000" },
+      { nama: "Bagus", jumlah: 0, catatan: "250.000" },
+      { nama: "Sika", jumlah: 0, catatan: "50.000" },
+      { nama: "Alfin", jumlah: 0, catatan: "310.000" },
+      { nama: "Alif", jumlah: 200000, catatan: "450.000" },
+      { nama: "Mala", jumlah: 650000, catatan: "750.000" },
+      { nama: "Agus", jumlah: 0, catatan: "150.000" },
+      { nama: "MPras", jumlah: 0, catatan: "1.250.000" },
+      { nama: "Fredy", jumlah: 500000, catatan: "1.000.000" }
+    ];
+
+    const belumTerbayar = [
+      { nama: "Warung ko Alif", jumlah: 0 },
+      { nama: "Warung 2", jumlah: 0 },
+      { nama: "warung kost 2", jumlah: 0 },
+      { nama: "Pak Niko", jumlah: 0 },
+      { nama: "AndreWinata", jumlah: 0 }
+    ];
+
+    function renderTabelData(idTable, idTotal, data, label) {
+      const table = document.getElementById(idTable);
+      const tbody = table.querySelector("tbody");
+      const totalElemen = document.getElementById(idTotal);
+      const hasCatatan = data.some(row => 'catatan' in row);
+
+      let total = 0;
+      tbody.innerHTML = data.map(row => {
+        total += row.jumlah;
+        return `
+          <tr>
+            <td>${row.nama}</td>
+            <td>Rp ${row.jumlah.toLocaleString()}</td>
+            ${hasCatatan ? `<td>${row.catatan || '-'}</td>` : ""}
+          </tr>
+        `;
+      }).join('');
+
+      totalElemen.innerText = `Total ${label}: Rp ${total.toLocaleString()}`;
+    }
+
+    renderTabelData("tabelHutangSaya", "totalHutangSaya", hutangSaya, "hutang ke saya");
+    renderTabelData("tabelBelumTerbayar", "totalBelumTerbayar", belumTerbayar, "hutang belum terbayarkan");
+
+  </script>
+</body>
+</html>
