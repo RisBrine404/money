@@ -320,8 +320,8 @@
             `;
           }
         }).join('')}
-        <div class="total">Total yang dieksekusi: Rp ${p.totalEksekusi.toLocaleString()}</div>
-        <div class="total-terbayar">Hutang yang terbayarkan: Rp ${p.totalTerbayar.toLocaleString()}</div>
+        <div class="total-terbayar">Total hutang belum lunas: Rp ${p.totalEksekusi.toLocaleString()}</div>
+        <div class="total">Hutang yang terbayarkan: Rp ${p.totalTerbayar.toLocaleString()}</div>
       </div>
     `).join('');
 
